@@ -1,0 +1,6 @@
+{
+  "name": "天宮小小航天員 - 太空站航天探險",
+  "description": "專為香港中學 SEN 學生設計的國慶主題「天宮太空站航天探險」橫向平台互動遊戲，支援廣東話語音朗讀、成就徽章系統、沉浸式太空站艙段環境視覺特效與無障礙操作。",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

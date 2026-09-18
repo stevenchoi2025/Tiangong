@@ -1,0 +1,3763 @@
+<!doctype html>
+<html lang="zh-HK">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover" />
+    <title>天宮小小航天員 - 太空站航天探險</title>
+    <meta name="description" content="專為香港中學 SEN 學生設計的國慶主題「天宮太空站航天探險」橫向平台互動遊戲，支援廣東話語音朗讀、成就徽章系統、沉浸式太空站艙段環境視覺特效與無障礙操作。" />
+    <meta property="og:title" content="天宮小小航天員 - 太空站航天探險" />
+    <meta property="og:description" content="專為香港中學 SEN 學生設計的國慶主題「天宮太空站航天探險」橫向平台互動遊戲，支援廣東話語音朗讀、成就徽章系統、沉浸式太空站艙段環境視覺特效與無障礙操作。" />
+    <meta property="og:type" content="website" />
+    <meta name="twitter:card" content="summary_large_image" />
+    <style>
+      /* 全局基礎與無障礙排版樣式 */
+      :root {
+        --color-bg: #070b19;
+        --color-card-bg: #0f172a;
+        --color-text: #f8fafc;
+        --color-text-sub: #94a3b8;
+        --color-accent-blue: #38bdf8;
+        --color-accent-gold: #fbbf24;
+        --color-accent-green: #34d399;
+        --color-accent-purple: #c084fc;
+        --color-button: #1e293b;
+        --color-button-hover: #334155;
+        --font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "PingFang HK", "Microsoft JhengHei", "Noto Sans TC", sans-serif;
+      }
+
+      * {
+        box-sizing: border-box;
+        -webkit-tap-highlight-color: transparent;
+        user-select: none;
+        -webkit-user-select: none;
+      }
+
+      html, body {
+        margin: 0;
+        padding: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        background-color: var(--color-bg);
+        color: var(--color-text);
+        font-family: var(--font-family);
+      }
+
+      #game-container {
+        position: relative;
+        width: 100%;
+        height: 100%;
+        display: flex;
+        flex-direction: column;
+        overflow: hidden;
+        background: radial-gradient(circle at center, #0e1738 0%, #060914 100%);
+      }
+
+      /* 頂部導航與進度列 */
+      header#top-bar {
+        height: 60px;
+        min-height: 60px;
+        background: rgba(15, 23, 42, 0.88);
+        backdrop-filter: blur(8px);
+        border-bottom: 2px solid rgba(56, 189, 248, 0.25);
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 0 16px;
+        z-index: 20;
+      }
+
+      .header-title-box {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+      }
+
+      .station-logo {
+        font-size: 24px;
+        filter: drop-shadow(0 0 8px rgba(56, 189, 248, 0.6));
+      }
+
+      .app-heading {
+        font-size: 18px;
+        font-weight: 700;
+        letter-spacing: 0.5px;
+        color: #f1f5f9;
+        margin: 0;
+      }
+
+      .module-badge {
+        font-size: 13px;
+        padding: 4px 10px;
+        border-radius: 9999px;
+        font-weight: 600;
+        background: rgba(56, 189, 248, 0.15);
+        color: #7dd3fc;
+        border: 1px solid rgba(56, 189, 248, 0.4);
+        white-space: nowrap;
+      }
+
+      .header-actions {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+      }
+
+      .btn-header {
+        background: #1e293b;
+        color: #e2e8f0;
+        border: 1px solid #475569;
+        border-radius: 8px;
+        padding: 6px 12px;
+        font-size: 14px;
+        font-weight: 600;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+        transition: all 0.15s ease;
+      }
+
+      .btn-header:hover {
+        background: #334155;
+        border-color: #94a3b8;
+      }
+
+      .btn-header:active {
+        transform: scale(0.96);
+      }
+
+      /* 進度指示條 */
+      #progress-banner {
+        position: absolute;
+        top: 68px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(15, 23, 42, 0.9);
+        border: 1px solid rgba(251, 191, 36, 0.4);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+        border-radius: 20px;
+        padding: 6px 18px;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        z-index: 15;
+        pointer-events: none;
+      }
+
+      .progress-label {
+        font-size: 14px;
+        font-weight: 700;
+        color: #fef08a;
+      }
+
+      .star-dots {
+        display: flex;
+        gap: 4px;
+      }
+
+      .star-dot {
+        font-size: 14px;
+        opacity: 0.3;
+        transition: transform 0.3s cubic-bezier(0.34, 1.56, 0.64, 1), opacity 0.3s;
+      }
+
+      .star-dot.active {
+        opacity: 1;
+        transform: scale(1.2);
+        filter: drop-shadow(0 0 4px #facc15);
+      }
+
+      /* 畫布視窗 */
+      #canvas-wrapper {
+        flex: 1;
+        position: relative;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+      }
+
+      canvas#gameCanvas {
+        display: block;
+        width: 100%;
+        height: 100%;
+        touch-action: none;
+      }
+
+      /* 畫面中間之安全返回提示 */
+      #safe-toast {
+        position: absolute;
+        top: 25%;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(16, 185, 129, 0.95);
+        color: #ffffff;
+        font-size: 18px;
+        font-weight: 700;
+        padding: 12px 24px;
+        border-radius: 999px;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.5);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.25s ease, transform 0.25s ease;
+        z-index: 30;
+      }
+
+      #safe-toast.show {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+      }
+
+      /* 走近探索點時的懸浮提示 (電腦與平板提示) */
+      #proximity-hint {
+        position: absolute;
+        bottom: 120px;
+        left: 50%;
+        transform: translateX(-50%);
+        background: rgba(251, 191, 36, 0.95);
+        color: #0f172a;
+        font-size: 17px;
+        font-weight: 800;
+        padding: 10px 22px;
+        border-radius: 30px;
+        box-shadow: 0 6px 20px rgba(251, 191, 36, 0.5);
+        pointer-events: none;
+        opacity: 0;
+        transition: opacity 0.2s, transform 0.2s;
+        z-index: 25;
+        animation: pulseBounce 1.2s infinite ease-in-out;
+      }
+
+      #proximity-hint.show {
+        opacity: 1;
+      }
+
+      @keyframes pulseBounce {
+        0%, 100% { transform: translateX(-50%) translateY(0); }
+        50% { transform: translateX(-50%) translateY(-6px); }
+      }
+
+      /* 手機/觸控控制器 */
+      #touch-controls {
+        position: absolute;
+        bottom: 16px;
+        left: 0;
+        right: 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+        padding: 0 20px;
+        pointer-events: none;
+        z-index: 30;
+      }
+
+      .touch-group {
+        display: flex;
+        gap: 14px;
+        pointer-events: auto;
+      }
+
+      .touch-btn {
+        width: 72px;
+        height: 72px;
+        border-radius: 20px;
+        background: rgba(30, 41, 59, 0.88);
+        border: 2px solid rgba(148, 163, 184, 0.6);
+        color: #ffffff;
+        font-size: 26px;
+        font-weight: bold;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        box-shadow: 0 6px 16px rgba(0, 0, 0, 0.4);
+        cursor: pointer;
+        user-select: none;
+        -webkit-user-select: none;
+        touch-action: manipulation;
+        transition: transform 0.08s, background 0.1s, border-color 0.1s;
+      }
+
+      .touch-btn span.btn-subtext {
+        font-size: 11px;
+        font-weight: 700;
+        color: #94a3b8;
+        margin-top: -2px;
+      }
+
+      .touch-btn:active, .touch-btn.active {
+        transform: scale(0.92);
+        background: #334155;
+        border-color: #38bdf8;
+      }
+
+      .touch-btn-jump {
+        background: rgba(14, 165, 233, 0.85);
+        border-color: #38bdf8;
+        width: 80px;
+        height: 80px;
+        border-radius: 24px;
+      }
+
+      .touch-btn-jump:active, .touch-btn-jump.active {
+        background: #0284c7;
+      }
+
+      .touch-btn-explore {
+        background: rgba(245, 158, 11, 0.88);
+        border-color: #fbbf24;
+        width: 80px;
+        height: 80px;
+        border-radius: 24px;
+        display: flex;
+        animation: glowBtn 1.5s infinite alternate;
+      }
+
+      .touch-btn-explore.disabled {
+        opacity: 0.35;
+        animation: none;
+        background: rgba(30, 41, 59, 0.6);
+        border-color: #475569;
+      }
+
+      @keyframes glowBtn {
+        0% { box-shadow: 0 0 10px rgba(245, 158, 11, 0.4); }
+        100% { box-shadow: 0 0 24px rgba(245, 158, 11, 0.85); }
+      }
+
+      /* 模態視窗通用遮罩 */
+      .modal-overlay {
+        position: fixed;
+        inset: 0;
+        background: rgba(3, 7, 18, 0.85);
+        backdrop-filter: blur(8px);
+        display: none;
+        align-items: center;
+        justify-content: center;
+        padding: 16px;
+        z-index: 100;
+      }
+
+      .modal-overlay.active {
+        display: flex;
+      }
+
+      .modal-card {
+        background: #0f172a;
+        border: 2px solid #38bdf8;
+        border-radius: 24px;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.7), 0 0 30px rgba(56, 189, 248, 0.2);
+        max-width: 600px;
+        width: 100%;
+        max-height: 92vh;
+        overflow-y: auto;
+        padding: 28px 24px;
+        color: #f8fafc;
+        display: flex;
+        flex-direction: column;
+        gap: 18px;
+        animation: modalIn 0.25s ease-out;
+      }
+
+      @keyframes modalIn {
+        from { opacity: 0; transform: scale(0.92); }
+        to { opacity: 1; transform: scale(1); }
+      }
+
+      /* 開場視窗 */
+      .intro-badge {
+        display: inline-flex;
+        align-items: center;
+        gap: 6px;
+        background: rgba(251, 191, 36, 0.15);
+        color: #fbbf24;
+        border: 1px solid rgba(251, 191, 36, 0.4);
+        padding: 4px 14px;
+        border-radius: 999px;
+        font-size: 14px;
+        font-weight: 700;
+        align-self: flex-start;
+      }
+
+      .intro-title {
+        font-size: 26px;
+        font-weight: 800;
+        margin: 0;
+        color: #ffffff;
+        line-height: 1.3;
+      }
+
+      .intro-desc {
+        font-size: 18px;
+        line-height: 1.7;
+        color: #e2e8f0;
+        background: rgba(30, 41, 59, 0.6);
+        padding: 18px;
+        border-radius: 16px;
+        border-left: 4px solid #38bdf8;
+      }
+
+      .intro-key-tips {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 10px;
+      }
+
+      .key-tip-item {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid #475569;
+        border-radius: 12px;
+        padding: 10px 14px;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 14px;
+        font-weight: 600;
+      }
+
+      .key-kbd {
+        background: #1e293b;
+        border: 1px solid #64748b;
+        color: #38bdf8;
+        padding: 3px 8px;
+        border-radius: 6px;
+        font-weight: 700;
+      }
+
+      .btn-primary {
+        background: linear-gradient(135deg, #0284c7 0%, #2563eb 100%);
+        color: #ffffff;
+        border: none;
+        border-radius: 16px;
+        padding: 16px 28px;
+        font-size: 20px;
+        font-weight: 800;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 10px;
+        box-shadow: 0 6px 20px rgba(2, 132, 199, 0.5);
+        transition: transform 0.15s, box-shadow 0.15s;
+      }
+
+      .btn-primary:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 8px 24px rgba(2, 132, 199, 0.7);
+      }
+
+      .btn-primary:active {
+        transform: translateY(1px);
+      }
+
+      .btn-speech {
+        background: rgba(251, 191, 36, 0.15);
+        color: #fbbf24;
+        border: 2px solid #f59e0b;
+        border-radius: 14px;
+        padding: 12px 20px;
+        font-size: 16px;
+        font-weight: 700;
+        cursor: pointer;
+        display: inline-flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        transition: all 0.15s;
+      }
+
+      .btn-speech:hover {
+        background: rgba(251, 191, 36, 0.25);
+      }
+
+      .btn-speech.speaking {
+        background: #f59e0b;
+        color: #0f172a;
+        animation: speakPulse 1s infinite alternate;
+      }
+
+      @keyframes speakPulse {
+        0% { transform: scale(1); }
+        100% { transform: scale(1.04); }
+      }
+
+      /* 題目卡片設計 (SEN 強化高對比大按鈕) */
+      .question-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #1e293b;
+        padding-bottom: 12px;
+      }
+
+      .question-pod-title {
+        font-size: 16px;
+        font-weight: 700;
+        color: #38bdf8;
+        display: flex;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .question-text-box {
+        background: rgba(30, 41, 59, 0.8);
+        border: 2px solid #334155;
+        border-radius: 18px;
+        padding: 18px 20px;
+      }
+
+      .question-title {
+        font-size: 21px;
+        font-weight: 800;
+        color: #ffffff;
+        line-height: 1.6;
+        margin: 0 0 12px 0;
+      }
+
+      .options-list {
+        display: flex;
+        flex-direction: column;
+        gap: 12px;
+        margin-top: 6px;
+      }
+
+      .option-btn {
+        background: #1e293b;
+        border: 2px solid #475569;
+        border-radius: 16px;
+        padding: 16px 20px;
+        color: #f8fafc;
+        font-size: 18px;
+        font-weight: 700;
+        text-align: left;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: all 0.15s ease;
+        line-height: 1.4;
+      }
+
+      .option-btn:hover {
+        background: #334155;
+        border-color: #38bdf8;
+        transform: translateX(4px);
+      }
+
+      .option-btn:active {
+        transform: scale(0.98);
+      }
+
+      .option-btn.correct {
+        background: rgba(16, 185, 129, 0.25);
+        border-color: #10b981;
+        color: #6ee7b7;
+      }
+
+      .option-btn.wrong-shake {
+        background: rgba(249, 115, 22, 0.2);
+        border-color: #f97316;
+        color: #fdba74;
+        animation: shake 0.35s ease;
+      }
+
+      @keyframes shake {
+        0%, 100% { transform: translateX(0); }
+        20%, 60% { transform: translateX(-8px); }
+        40%, 80% { transform: translateX(8px); }
+      }
+
+      /* 答錯/提示與答對回饋區 */
+      .feedback-box {
+        border-radius: 16px;
+        padding: 16px;
+        font-size: 17px;
+        font-weight: 700;
+        display: none;
+        flex-direction: column;
+        gap: 10px;
+      }
+
+      .feedback-box.active {
+        display: flex;
+      }
+
+      .feedback-box.correct {
+        background: rgba(16, 185, 129, 0.18);
+        border: 2px solid #10b981;
+        color: #6ee7b7;
+      }
+
+      .feedback-box.wrong {
+        background: rgba(245, 158, 11, 0.18);
+        border: 2px solid #f59e0b;
+        color: #fde047;
+      }
+
+      .feedback-row {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        gap: 8px;
+      }
+
+      /* 過場視窗 */
+      .transition-card {
+        text-align: center;
+        align-items: center;
+      }
+
+      .transition-icon {
+        font-size: 56px;
+        animation: float 2s infinite ease-in-out;
+      }
+
+      @keyframes float {
+        0%, 100% { transform: translateY(0); }
+        50% { transform: translateY(-10px); }
+      }
+
+      /* 結算榮譽證書 */
+      #certificate-modal .modal-card {
+        max-width: 680px;
+        background: #090d1f;
+        border: 4px solid #fbbf24;
+      }
+
+      .certificate-container {
+        background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 100%);
+        border: 3px dashed #f59e0b;
+        border-radius: 20px;
+        padding: 30px;
+        text-align: center;
+        color: #ffffff;
+        position: relative;
+      }
+
+      .cert-header {
+        font-size: 28px;
+        font-weight: 900;
+        color: #facc15;
+        letter-spacing: 2px;
+        margin-bottom: 8px;
+      }
+
+      .cert-recipient-box {
+        margin: 20px 0;
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: rgba(255, 255, 255, 0.1);
+        padding: 8px 20px;
+        border-radius: 999px;
+        border: 1px solid rgba(251, 191, 36, 0.5);
+      }
+
+      .cert-recipient-label {
+        font-size: 16px;
+        color: #cbd5e1;
+      }
+
+      .cert-name-input {
+        background: transparent;
+        border: none;
+        border-bottom: 2px solid #fbbf24;
+        color: #fef08a;
+        font-size: 20px;
+        font-weight: 800;
+        text-align: center;
+        outline: none;
+        width: 160px;
+        font-family: inherit;
+      }
+
+      .cert-body {
+        font-size: 18px;
+        line-height: 1.8;
+        color: #e2e8f0;
+        margin: 16px 0;
+      }
+
+      .cert-skills {
+        display: flex;
+        justify-content: center;
+        gap: 14px;
+        margin: 20px 0;
+        flex-wrap: wrap;
+      }
+
+      .cert-skill-tag {
+        background: rgba(56, 189, 248, 0.18);
+        border: 1px solid #38bdf8;
+        color: #bae6fd;
+        padding: 8px 16px;
+        border-radius: 12px;
+        font-weight: 700;
+        font-size: 15px;
+      }
+
+      .cert-badge {
+        font-size: 22px;
+        font-weight: 800;
+        color: #4ade80;
+        margin-top: 14px;
+      }
+
+      .cert-footer-actions {
+        display: flex;
+        gap: 12px;
+        justify-content: center;
+        flex-wrap: wrap;
+        margin-top: 16px;
+      }
+
+      /* 證書頁面徽章展櫃 (SEN 強化可視化成就榮譽) */
+      .cert-badges-showcase {
+        margin: 18px 0;
+        background: rgba(15, 23, 42, 0.7);
+        border: 2px solid rgba(251, 191, 36, 0.55);
+        border-radius: 16px;
+        padding: 14px 16px;
+        box-shadow: inset 0 0 15px rgba(251, 191, 36, 0.1);
+      }
+
+      .cert-badges-header {
+        font-size: 16px;
+        font-weight: 800;
+        color: #facc15;
+        margin-bottom: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 8px;
+        letter-spacing: 0.5px;
+      }
+
+      .cert-badges-grid {
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: center;
+        gap: 10px;
+      }
+
+      .cert-badge-pill {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        background: linear-gradient(135deg, rgba(30, 41, 59, 0.95), rgba(49, 46, 129, 0.8));
+        border: 1.5px solid #f59e0b;
+        border-radius: 12px;
+        padding: 7px 14px;
+        color: #fef08a;
+        font-weight: 700;
+        font-size: 14px;
+        box-shadow: 0 4px 10px rgba(0, 0, 0, 0.4);
+      }
+
+      .cert-badge-pill.locked {
+        background: rgba(30, 41, 59, 0.4);
+        border-color: #475569;
+        color: #94a3b8;
+        opacity: 0.55;
+      }
+
+      .cert-all-badges-banner {
+        margin-top: 12px;
+        font-size: 14px;
+        font-weight: 800;
+        color: #34d399;
+        letter-spacing: 0.5px;
+        animation: pulseSubtle 2s infinite alternate;
+      }
+
+      @keyframes pulseSubtle {
+        0% { transform: scale(1); opacity: 0.9; }
+        100% { transform: scale(1.02); opacity: 1; }
+      }
+
+      /* 成就按鈕高亮樣式 */
+      .btn-badges {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.25), rgba(234, 179, 8, 0.15));
+        border: 1px solid rgba(245, 158, 11, 0.7);
+        color: #fef08a;
+      }
+
+      .btn-badges:hover {
+        background: linear-gradient(135deg, rgba(245, 158, 11, 0.38), rgba(234, 179, 8, 0.25));
+        border-color: #fde047;
+        box-shadow: 0 0 12px rgba(245, 158, 11, 0.4);
+      }
+
+      /* 即時成就解鎖彈出橫幅 (Achievement Toast) */
+      #achievement-toast {
+        position: fixed;
+        top: 66px;
+        left: 50%;
+        transform: translateX(-50%) translateY(-140%);
+        background: linear-gradient(135deg, #1e1b4b 0%, #0f172a 100%);
+        border: 2px solid #fbbf24;
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.8), 0 0 24px rgba(251, 191, 36, 0.5);
+        border-radius: 18px;
+        padding: 12px 22px;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        z-index: 100;
+        transition: transform 0.4s cubic-bezier(0.175, 0.885, 0.32, 1.275), opacity 0.3s;
+        opacity: 0;
+        pointer-events: none;
+      }
+
+      #achievement-toast.show {
+        transform: translateX(-50%) translateY(0);
+        opacity: 1;
+        pointer-events: auto;
+        cursor: pointer;
+      }
+
+      .achievement-toast-icon {
+        font-size: 36px;
+        filter: drop-shadow(0 0 8px rgba(251, 191, 36, 0.8));
+        animation: toastPop 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+      }
+
+      @keyframes toastPop {
+        0% { transform: scale(0.4) rotate(-20deg); }
+        60% { transform: scale(1.25) rotate(10deg); }
+        100% { transform: scale(1) rotate(0); }
+      }
+
+      .achievement-toast-info {
+        display: flex;
+        flex-direction: column;
+        gap: 2px;
+      }
+
+      .achievement-toast-subtitle {
+        font-size: 13px;
+        font-weight: 700;
+        color: #facc15;
+        letter-spacing: 0.5px;
+      }
+
+      .achievement-toast-title {
+        font-size: 17px;
+        font-weight: 800;
+        color: #ffffff;
+      }
+
+      /* 成就徽章彈窗 (Badges Modal) */
+      #badges-modal .badges-modal-card {
+        max-width: 760px;
+        background: #090e24;
+        border: 3px solid #38bdf8;
+        box-shadow: 0 20px 50px rgba(0, 0, 0, 0.85), 0 0 30px rgba(56, 189, 248, 0.25);
+      }
+
+      .badges-modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        border-bottom: 2px solid #1e293b;
+        padding-bottom: 14px;
+      }
+
+      .badges-modal-title {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-size: 22px;
+        font-weight: 800;
+        color: #f8fafc;
+      }
+
+      .badges-progress-summary {
+        background: rgba(30, 41, 59, 0.8);
+        border: 1px solid #334155;
+        border-radius: 16px;
+        padding: 14px 18px;
+        display: flex;
+        flex-direction: column;
+        gap: 8px;
+        margin: 12px 0 16px 0;
+      }
+
+      .badges-progress-text-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        font-size: 16px;
+        font-weight: 700;
+        color: #e2e8f0;
+      }
+
+      .badges-bar-track {
+        width: 100%;
+        height: 12px;
+        background: #1e293b;
+        border-radius: 999px;
+        overflow: hidden;
+        border: 1px solid #334155;
+      }
+
+      .badges-bar-fill {
+        height: 100%;
+        width: 0%;
+        background: linear-gradient(90deg, #38bdf8, #f59e0b, #10b981);
+        border-radius: 999px;
+        transition: width 0.4s ease;
+      }
+
+      .badges-grid {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 14px;
+        max-height: 52vh;
+        overflow-y: auto;
+        padding-right: 4px;
+      }
+
+      @media (max-width: 640px) {
+        .badges-grid {
+          grid-template-columns: 1fr;
+          max-height: 48vh;
+        }
+      }
+
+      .badge-item-card {
+        background: #111827;
+        border: 2px solid #374151;
+        border-radius: 16px;
+        padding: 14px;
+        display: flex;
+        gap: 14px;
+        align-items: flex-start;
+        transition: all 0.2s ease;
+        position: relative;
+        overflow: hidden;
+      }
+
+      .badge-item-card.unlocked {
+        background: linear-gradient(135deg, rgba(15, 23, 42, 0.95), rgba(30, 27, 75, 0.7));
+        border-color: #fbbf24;
+        box-shadow: 0 4px 16px rgba(0, 0, 0, 0.4), inset 0 0 15px rgba(251, 191, 36, 0.08);
+      }
+
+      .badge-item-card.locked {
+        opacity: 0.65;
+        background: #0f172a;
+        border-color: #334155;
+      }
+
+      .badge-item-icon-box {
+        width: 58px;
+        height: 58px;
+        border-radius: 14px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 32px;
+        flex-shrink: 0;
+        position: relative;
+      }
+
+      .badge-item-card.unlocked .badge-item-icon-box {
+        background: rgba(251, 191, 36, 0.15);
+        border: 2px solid rgba(251, 191, 36, 0.5);
+        box-shadow: 0 0 14px rgba(251, 191, 36, 0.3);
+      }
+
+      .badge-item-card.locked .badge-item-icon-box {
+        background: rgba(51, 65, 85, 0.5);
+        border: 2px solid #475569;
+        filter: grayscale(1);
+      }
+
+      .badge-lock-tag {
+        position: absolute;
+        bottom: -4px;
+        right: -4px;
+        background: #334155;
+        border: 1px solid #64748b;
+        border-radius: 999px;
+        font-size: 11px;
+        padding: 1px 4px;
+      }
+
+      .badge-item-content {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4px;
+        min-width: 0;
+      }
+
+      .badge-item-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        gap: 6px;
+      }
+
+      .badge-item-name {
+        font-size: 17px;
+        font-weight: 800;
+        color: #f8fafc;
+      }
+
+      .badge-item-card.unlocked .badge-item-name {
+        color: #fef08a;
+      }
+
+      .badge-status-pill {
+        font-size: 12px;
+        font-weight: 700;
+        padding: 2px 8px;
+        border-radius: 999px;
+        white-space: nowrap;
+      }
+
+      .badge-status-pill.unlocked {
+        background: rgba(16, 185, 129, 0.2);
+        color: #6ee7b7;
+        border: 1px solid #10b981;
+      }
+
+      .badge-status-pill.locked {
+        background: rgba(148, 163, 184, 0.15);
+        color: #94a3b8;
+        border: 1px solid #475569;
+      }
+
+      .badge-item-desc {
+        font-size: 13.5px;
+        color: #cbd5e1;
+        line-height: 1.45;
+        margin: 0;
+      }
+
+      .badge-item-req {
+        font-size: 12px;
+        color: #94a3b8;
+        margin-top: 2px;
+      }
+
+      .badge-item-footer {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-top: 6px;
+      }
+
+      .badge-item-progress {
+        font-size: 12px;
+        font-weight: 700;
+        color: #38bdf8;
+      }
+
+      /* 列印樣式：隱藏非證書元素 */
+      @media print {
+        body * {
+          visibility: hidden !important;
+        }
+        #certificate-modal, #certificate-modal * {
+          visibility: visible !important;
+        }
+        #certificate-modal {
+          position: absolute;
+          inset: 0;
+          background: #ffffff !important;
+          padding: 0;
+          display: block !important;
+        }
+        .modal-card {
+          border: none !important;
+          box-shadow: none !important;
+          max-width: 100% !important;
+          background: #ffffff !important;
+          color: #000000 !important;
+          padding: 20px !important;
+        }
+        .certificate-container {
+          background: #ffffff !important;
+          border: 4px solid #b45309 !important;
+          color: #0f172a !important;
+          box-shadow: none !important;
+        }
+        .cert-header {
+          color: #b45309 !important;
+        }
+        .cert-name-input {
+          color: #0f172a !important;
+          border-bottom-color: #0f172a !important;
+        }
+        .cert-body {
+          color: #1e293b !important;
+        }
+        .cert-skill-tag {
+          background: #f1f5f9 !important;
+          border-color: #64748b !important;
+          color: #0f172a !important;
+        }
+        .cert-badges-showcase {
+          background: #ffffff !important;
+          border: 2px solid #b45309 !important;
+          color: #0f172a !important;
+          box-shadow: none !important;
+        }
+        .cert-badges-header {
+          color: #b45309 !important;
+        }
+        .cert-badge-pill {
+          background: #f8fafc !important;
+          border: 1.5px solid #b45309 !important;
+          color: #0f172a !important;
+          box-shadow: none !important;
+        }
+        .cert-badge-pill.locked {
+          display: none !important;
+        }
+        .cert-all-badges-banner {
+          color: #15803d !important;
+        }
+        .cert-badge {
+          color: #15803d !important;
+        }
+        .cert-footer-actions, header, #progress-banner, #touch-controls, #achievement-toast, #badges-modal {
+          display: none !important;
+        }
+      }
+
+      /* 響應式微調 */
+      @media (max-width: 640px) {
+        .app-heading {
+          font-size: 15px;
+        }
+        .module-badge {
+          display: none;
+        }
+        .touch-btn {
+          width: 64px;
+          height: 64px;
+          font-size: 22px;
+        }
+        .touch-btn-jump, .touch-btn-explore {
+          width: 72px;
+          height: 72px;
+        }
+        .question-title {
+          font-size: 18px;
+        }
+        .option-btn {
+          font-size: 16px;
+          padding: 14px 16px;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div id="game-container">
+      <!-- 頂部導航欄 -->
+      <header id="top-bar">
+        <div class="header-title-box">
+          <span class="station-logo" aria-hidden="true">🛰️</span>
+          <h1 class="app-heading">天宮小小航天員</h1>
+          <span id="header-module-name" class="module-badge">天和核心艙（生活區）</span>
+        </div>
+
+        <div class="header-actions">
+          <!-- 航天成就徽章按鈕 -->
+          <button id="btn-badges-toggle" class="btn-header btn-badges" title="查看航天成就徽章與收集進度">
+            <span>🎖️ 成就徽章 (<span id="unlocked-badge-count">0</span>/6)</span>
+          </button>
+          <!-- 語音速度切換按鈕 (SEN 特別友好) -->
+          <button id="btn-rate-toggle" class="btn-header" title="切換朗讀語速">
+            <span>🐢 慢速朗讀</span>
+          </button>
+          <!-- 音效開關 -->
+          <button id="btn-sound-toggle" class="btn-header" title="開啟/關閉音效">
+            <span id="sound-icon">🔊 音效</span>
+          </button>
+          <!-- 重新開始 -->
+          <button id="btn-restart" class="btn-header" title="清除進度重新開始">
+            <span>↻ 重設</span>
+          </button>
+          <!-- 下載單檔 index.html (離線可直接開啟) -->
+          <button id="btn-download-html" class="btn-header" title="下載本單檔 HTML 供離線使用">
+            <span>💾 下載單檔</span>
+          </button>
+        </div>
+      </header>
+
+      <!-- 即時成就解鎖提示橫幅 (點擊可直接打開徽章榜) -->
+      <div id="achievement-toast" title="點擊查看成就榮譽榜">
+        <div class="achievement-toast-icon" id="toast-badge-icon">🎖️</div>
+        <div class="achievement-toast-info">
+          <div class="achievement-toast-subtitle">✨ 榮獲新成就徽章！</div>
+          <div class="achievement-toast-title" id="toast-badge-name">天和生活大師</div>
+        </div>
+      </div>
+
+      <!-- 進度指示卡 -->
+      <div id="progress-banner">
+        <span class="progress-label" id="progress-text">已完成：0 / 15 題</span>
+        <div class="star-dots" id="star-dots-container">
+          <!-- 15 個星星指示燈由 JavaScript 自動生成 -->
+        </div>
+      </div>
+
+      <!-- 遊戲畫布容器 -->
+      <div id="canvas-wrapper">
+        <canvas id="gameCanvas"></canvas>
+
+        <!-- 掉落復位溫和提示 -->
+        <div id="safe-toast">不用怕，返回安全位置，再試一次！🌟</div>
+
+        <!-- 走近探索點提示 -->
+        <div id="proximity-hint">✨ 發現探索點！按 E 探索</div>
+      </div>
+
+      <!-- 手機/觸控大按鈕控制區 -->
+      <div id="touch-controls">
+        <div class="touch-group">
+          <div id="btn-touch-left" class="touch-btn" role="button" aria-label="向左移動">
+            ◀
+            <span class="btn-subtext">左移</span>
+          </div>
+          <div id="btn-touch-right" class="touch-btn" role="button" aria-label="向右移動">
+            ▶
+            <span class="btn-subtext">右移</span>
+          </div>
+        </div>
+
+        <div class="touch-group">
+          <div id="btn-touch-explore" class="touch-btn touch-btn-explore disabled" role="button" aria-label="探索設施">
+            🔍
+            <span class="btn-subtext">探索</span>
+          </div>
+          <div id="btn-touch-jump" class="touch-btn touch-btn-jump" role="button" aria-label="向上跳躍">
+            ↑
+            <span class="btn-subtext">跳躍</span>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- 1. 開場說明視窗 (Game Start Modal) -->
+    <div id="intro-modal" class="modal-overlay active">
+      <div class="modal-card">
+        <div class="intro-badge">國慶航天主題探險</div>
+        <h2 class="intro-title">🚀 歡迎來到《天宮小小航天員》！</h2>
+        <div class="intro-desc">
+          今天，你會親自走進天宮太空站，完成 15 個航天任務。<br />
+          用方向鍵或畫面按鈕移動；走近發光裝置後，按「探索」吧！
+        </div>
+
+        <div class="intro-key-tips">
+          <div class="key-tip-item">
+            <span class="key-kbd">A / D 或 ◀ ▶</span>
+            <span>左右移動</span>
+          </div>
+          <div class="key-tip-item">
+            <span class="key-kbd">W 或 空白鍵 或 ↑</span>
+            <span>輕盈跳躍</span>
+          </div>
+          <div class="key-tip-item">
+            <span class="key-kbd">E 鍵 或 🔍 探索</span>
+            <span>走近裝置探索</span>
+          </div>
+          <div class="key-tip-item">
+            <span class="key-kbd">🔊 廣東話朗讀</span>
+            <span>每題均可朗讀</span>
+          </div>
+        </div>
+
+        <div style="display: flex; gap: 12px; margin-top: 10px; flex-wrap: wrap;">
+          <button id="btn-start-game" class="btn-primary" style="flex: 1;">
+            開始任務 🚀
+          </button>
+          <button id="btn-speak-intro" class="btn-speech">
+            🔊 朗讀指示
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 2. 題目卡片視窗 (Question Modal) -->
+    <div id="question-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="question-header">
+          <div class="question-pod-title">
+            <span id="modal-pod-icon">🔬</span>
+            <span id="modal-pod-location">大堂</span>
+          </div>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div id="modal-q-progress" style="font-size: 14px; font-weight: 700; color: #94a3b8;">
+              題目 1 / 15
+            </div>
+            <button id="btn-close-question" class="btn-header" style="padding: 4px 10px; font-size: 13px;" title="暫時返回太空站">
+              ✕
+            </button>
+          </div>
+        </div>
+
+        <div class="question-text-box">
+          <h3 id="modal-question-title" class="question-title">
+            在天宮太空站內，航天員的身體會怎樣？
+          </h3>
+          <button id="btn-speak-question" class="btn-speech" style="padding: 6px 14px; font-size: 14px;">
+            🔊 朗讀題目與選項
+          </button>
+        </div>
+
+        <!-- 三個選項直列排列 -->
+        <div class="options-list" id="modal-options-container">
+          <!-- 由 JS 動態生成選項按鈕 -->
+        </div>
+
+        <!-- 答對/答錯提示反饋卡 -->
+        <div id="feedback-box" class="feedback-box">
+          <div class="feedback-row">
+            <span id="feedback-message">提示訊息</span>
+            <button id="btn-speak-feedback" class="btn-speech" style="padding: 4px 10px; font-size: 13px;">
+              🔊 朗讀提示
+            </button>
+          </div>
+        </div>
+
+        <!-- 答對後的「繼續探索」大按鈕 -->
+        <button id="btn-continue-explore" class="btn-primary" style="display: none; width: 100%;">
+          做得好！繼續探索 ➔
+        </button>
+      </div>
+    </div>
+
+    <!-- 3. 艙段過場視窗 (Module Transition Modal) -->
+    <div id="transition-modal" class="modal-overlay">
+      <div class="modal-card transition-card">
+        <div class="transition-icon">🌟</div>
+        <h2 id="transition-title" style="font-size: 24px; color: #facc15; margin: 0;">做得很好！</h2>
+        <div id="transition-desc" class="intro-desc" style="width: 100%; text-align: center;">
+          你已完成這個艙段的任務。<br />
+          下一站：<strong>問天實驗艙（科學區）</strong>！
+        </div>
+        <div style="display: flex; gap: 12px; width: 100%;">
+          <button id="btn-next-module" class="btn-primary" style="flex: 1;">
+            進入下一艙段 ➔
+          </button>
+          <button id="btn-speak-transition" class="btn-speech">
+            🔊 廣東話朗讀
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 4. 榮譽證書完成視窗 (Certificate Modal) -->
+    <div id="certificate-modal" class="modal-overlay">
+      <div class="modal-card">
+        <div class="certificate-container" id="printable-certificate">
+          <div style="font-size: 40px; margin-bottom: 4px;">🏆</div>
+          <div class="cert-header">📜 榮譽證書</div>
+          <div style="font-size: 14px; color: #fbbf24; font-weight: 700; letter-spacing: 1px;">
+            中國航天科技國慶探索營
+          </div>
+
+          <div class="cert-recipient-box">
+            <span class="cert-recipient-label">頒發予：</span>
+            <input type="text" id="cert-student-name" class="cert-name-input" value="小小航天員" title="點擊輸入學生姓名" />
+            <span>同學</span>
+          </div>
+
+          <div class="cert-body">
+            恭喜你成功走遍天宮太空站，完成全部 <strong>15 個航天任務</strong>！🚀
+          </div>
+
+          <div class="cert-skills">
+            <span class="cert-skill-tag">✅ 微重力觀察</span>
+            <span class="cert-skill-tag">✅ 太空實驗</span>
+            <span class="cert-skill-tag">✅ 航天生活</span>
+          </div>
+
+          <!-- 收集到的航天成就徽章總展櫃 -->
+          <div class="cert-badges-showcase">
+            <div class="cert-badges-header">
+              <span>🎖️ 已收集的航天成就徽章（<span id="cert-badge-count-text">0 / 6</span>）</span>
+            </div>
+            <div class="cert-badges-grid" id="cert-badges-list">
+              <!-- 由 JavaScript 動態生成徽章勳章 -->
+            </div>
+            <div id="cert-all-badges-award" class="cert-all-badges-banner" style="display: none;">
+              🌟 恭喜你達成「全成就大滿貫」榮譽！完美收集全部 6 枚航天徽章！
+            </div>
+          </div>
+
+          <div class="cert-badge">
+            你已成為叻叻的「小小航天員」！👏👏👏
+          </div>
+        </div>
+
+        <div class="cert-footer-actions">
+          <button id="btn-speak-cert" class="btn-speech">
+            🔊 朗讀祝賀
+          </button>
+          <button id="btn-print-cert" class="btn-primary" style="background: #059669; padding: 12px 22px; font-size: 16px;">
+            🖨️ 列印證書
+          </button>
+          <button id="btn-play-again" class="btn-primary" style="padding: 12px 22px; font-size: 16px;">
+            🏆 再玩一次
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 5. 成就徽章榮譽榜視窗 (Badges Modal) -->
+    <div id="badges-modal" class="modal-overlay">
+      <div class="modal-card badges-modal-card">
+        <div class="badges-modal-header">
+          <div class="badges-modal-title">
+            <span style="font-size: 26px;">🎖️</span>
+            <span>航天成就徽章榮譽榜</span>
+          </div>
+          <button id="btn-close-badges" class="btn-header" style="padding: 6px 12px; font-size: 14px;" title="關閉徽章視窗">
+            ✕ 關閉
+          </button>
+        </div>
+
+        <div class="badges-progress-summary">
+          <div class="badges-progress-text-row">
+            <span>已解鎖：<strong id="badges-modal-count">0</strong> / 6 個榮譽徽章</span>
+            <span id="badges-modal-percent" style="color: #fbbf24; font-weight: 800;">0%</span>
+          </div>
+          <div class="badges-bar-track">
+            <div class="badges-bar-fill" id="badges-modal-bar"></div>
+          </div>
+        </div>
+
+        <div class="badges-grid" id="badges-items-container">
+          <!-- 6 個徽章卡片由 JS 動態生成 -->
+        </div>
+
+        <div style="display: flex; gap: 12px; width: 100%; margin-top: 10px;">
+          <button id="btn-speak-badges-summary" class="btn-speech" style="flex: 1;">
+            🔊 朗讀成就總進度
+          </button>
+          <button id="btn-badges-done" class="btn-primary" style="flex: 1; padding: 12px 20px; font-size: 16px;">
+            返回太空站 ➔
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <!-- 遊戲主要邏輯（100% 自包含純原生代碼） -->
+    <script>
+      /* ==========================================================================
+         題目資料庫 (15 題完整資料陣列)
+         ========================================================================== */
+      const QUESTIONS_DATA = [
+        /* 天和核心艙（生活區）1 - 5 */
+        {
+          id: 1,
+          moduleIndex: 0,
+          moduleName: "天和核心艙（生活區）",
+          location: "大堂",
+          desc: "太空站主通道，航天員在此飄浮穿梭。",
+          question: "在天宮太空站內，航天員的身體會怎樣？",
+          speechText: "在天宮太空站內，航天員嘅身體會點樣呢？A 飄浮在空中，B 緊貼在地上，C 不停打滾。",
+          options: [
+            { key: "A", text: "飄浮在空中 🎈" },
+            { key: "B", text: "緊貼在地上 🧍" },
+            { key: "C", text: "不停打滾 🌀" }
+          ],
+          answer: "A",
+          hint: "想一想，太空站內的重力很小，航天員會怎樣呢？",
+          hintSpeech: "想一想，太空站入面嘅重力好細，航天員會點樣呢？"
+        },
+        {
+          id: 2,
+          moduleIndex: 0,
+          moduleName: "天和核心艙（生活區）",
+          location: "洗盥區",
+          desc: "航天員日常梳洗、清潔面部與雙手的地方。",
+          question: "航天員黎家盈擰乾濕毛巾時，毛巾裡的水會怎樣？",
+          speechText: "航天員黎家盈擰乾濕毛巾嗰陣，毛巾入面嘅水會點樣呢？A 像下雨般滴下，B 包裹在毛巾和手上，C 結成冰塊。",
+          options: [
+            { key: "A", text: "像下雨般滴下 🌧️" },
+            { key: "B", text: "包裹在毛巾和手上 💧" },
+            { key: "C", text: "結成冰塊 🧊" }
+          ],
+          answer: "B",
+          hint: "太空中水不會像地球上一樣向下滴。",
+          hintSpeech: "太空中嘅水唔會好似地球一樣向下滴㗎。"
+        },
+        {
+          id: 3,
+          moduleIndex: 0,
+          moduleName: "天和核心艙（生活區）",
+          location: "娛樂區",
+          desc: "放鬆與運動休閒的空間。",
+          question: "航天員在太空打「水球乒乓球」，水球會破裂嗎？",
+          speechText: "航天員喺太空打水球乒乓波，水球會唔會破裂呢？A 會立刻破裂，B 唔會破裂，而且會反彈，C 會變成正方形。",
+          options: [
+            { key: "A", text: "會立刻破裂 💥" },
+            { key: "B", text: "不會破裂，而且會反彈 🏓" },
+            { key: "C", text: "會變成正方形 🔲" }
+          ],
+          answer: "B",
+          hint: "水球碰到特別的球拍，仍可以彈來彈去。",
+          hintSpeech: "水球掂到特別嘅球拍，仍然可以彈嚟彈去㗎。"
+        },
+        {
+          id: 4,
+          moduleIndex: 0,
+          moduleName: "天和核心艙（生活區）",
+          location: "飲水機",
+          desc: "特製的太空飲水機，提供溫水與定量飲用水。",
+          question: "航天員在太空怎樣喝水？",
+          speechText: "航天員喺太空點樣飲水呢？A 使用普通水杯飲，B 從飲水袋擠入個口度，C 用手捧水飲。",
+          options: [
+            { key: "A", text: "使用普通水杯喝 🥛" },
+            { key: "B", text: "從飲水袋擠進口中 🧃" },
+            { key: "C", text: "用手捧水喝 🤲" }
+          ],
+          answer: "B",
+          hint: "水會飄浮，所以不能使用普通水杯。",
+          hintSpeech: "水會周圍飄，所以唔能夠用普通水杯㗎。"
+        },
+        {
+          id: 5,
+          moduleIndex: 0,
+          moduleName: "天和核心艙（生活區）",
+          location: "睡眠區",
+          desc: "獨立睡眠艙，設有觀景窗與專用睡袋。",
+          question: "航天員睡覺時，睡袋會固定在哪裡？",
+          speechText: "航天員瞓覺嗰陣，睡袋會固定喺邊度呢？A 瞓喺雙層床上，B 隨意浮喺半空，C 固定喺牆壁上面。",
+          options: [
+            { key: "A", text: "睡在雙層床上 🛏️" },
+            { key: "B", text: "隨意浮在半空 ☁️" },
+            { key: "C", text: "固定在牆壁上 🧱" }
+          ],
+          answer: "C",
+          hint: "如果不固定，航天員睡覺時會飄到別處。",
+          hintSpeech: "如果唔固定，航天員瞓覺嗰陣會飄到去第二度㗎。"
+        },
+
+        /* 問天實驗艙（科學區）6 - 10 */
+        {
+          id: 6,
+          moduleIndex: 1,
+          moduleName: "問天實驗艙（科學區）",
+          location: "物理實驗台",
+          desc: "進行微重力物理流體力學實驗的專用工作櫃。",
+          question: "為甚麼擰乾濕毛巾時，水不會向下滴？",
+          speechText: "點解擰乾濕毛巾嗰陣，水唔會向下滴呢？A 被外星人吸走，B 表面張力把水分拉住，C 變成蒸氣。",
+          options: [
+            { key: "A", text: "被外星人吸走 👽" },
+            { key: "B", text: "表面張力把水分拉住 🕸️" },
+            { key: "C", text: "變成蒸氣 ♨️" }
+          ],
+          answer: "B",
+          hint: "水分子之間有力量，會把水拉成水球。",
+          hintSpeech: "水分子之間有一種拉力，會將水拉成一個球體。"
+        },
+        {
+          id: 7,
+          moduleIndex: 1,
+          moduleName: "問天實驗艙（科學區）",
+          location: "液體觀察箱",
+          desc: "觀察微重力環境下流體形態變化。",
+          question: "從飲水袋擠出來的水，在太空會變成甚麼形狀？",
+          speechText: "由飲水袋擠出嚟嘅水，喺太空會變成咩形狀呢？A 圓形嘅球體，B 一灘平鋪嘅水，C 長方形。",
+          options: [
+            { key: "A", text: "圓形的球體 🔵" },
+            { key: "B", text: "一灘平鋪的水 💦" },
+            { key: "C", text: "長方形 🟩" }
+          ],
+          answer: "A",
+          hint: "沒有明顯重力拉住水，水會自然形成圓球。",
+          hintSpeech: "因為冇明顯嘅重力拉住，水會自然形成一個圓形嘅水球。"
+        },
+        {
+          id: 8,
+          moduleIndex: 1,
+          moduleName: "問天實驗艙（科學區）",
+          location: "太空溫室",
+          desc: "進行水稻與擬南芥擬種植實驗的培育箱。",
+          question: "在太空植物培育實驗中，植物栽種在哪裡？",
+          speechText: "喺太空植物培育實驗入面，植物種喺邊度呢？A 泥土花盆入面，B 艙外嘅太空環境，C 特製嘅植物培育箱入面。",
+          options: [
+            { key: "A", text: "泥土花盆裡 🪴" },
+            { key: "B", text: "艙外的太空環境 🌌" },
+            { key: "C", text: "特製的植物培育箱裡 📦" }
+          ],
+          answer: "C",
+          hint: "太空環境特別，植物需要特製設備照顧。",
+          hintSpeech: "太空環境好特別，植物需要特製嘅科技培育設備嚟細心照顧。"
+        },
+        {
+          id: 9,
+          moduleIndex: 1,
+          moduleName: "問天實驗艙（科學區）",
+          location: "太空廚房",
+          desc: "配備熱風加熱與食品冷藏保存櫃。",
+          question: "在太空廚房裡，航天員使用甚麼設備加熱食物？",
+          speechText: "喺太空廚房入面，航天員使用咩設備加熱食物呢？A 明火氣體爐，B 特製食物加熱器，C 擺喺太陽底下曬。",
+          options: [
+            { key: "A", text: "明火氣體爐 🔥" },
+            { key: "B", text: "特製食物加熱器 ⚡" },
+            { key: "C", text: "放在太陽下曬 ☀️" }
+          ],
+          answer: "B",
+          hint: "太空站不能隨便用明火。",
+          hintSpeech: "太空站入面好危險，唔可以隨便用明火㗎。"
+        },
+        {
+          id: 10,
+          moduleIndex: 1,
+          moduleName: "問天實驗艙（科學區）",
+          location: "物料儲存櫃",
+          desc: "存放各類科學實驗用具與特製表面材料。",
+          question: "打「水球乒乓球」使用的球拍，表面經過了甚麼特殊處理？",
+          speechText: "打水球乒乓波使用嘅球拍，表面經過咗咩特殊處理呢？A 普通木板，B 貼上疏水布料，C 普通鐵板。",
+          options: [
+            { key: "A", text: "普通木板 🪵" },
+            { key: "B", text: "貼上疏水布料 🧻" },
+            { key: "C", text: "普通鐵板 ⚙️" }
+          ],
+          answer: "B",
+          hint: "這種表面不容易沾水，所以水球不會化開。",
+          hintSpeech: "呢種特殊表面唔容易黐水，所以水球唔會散開。"
+        },
+
+        /* 夢天實驗艙（綜合區）11 - 15 */
+        {
+          id: 11,
+          moduleIndex: 2,
+          moduleName: "夢天實驗艙（綜合區）",
+          location: "生命保障系統",
+          desc: "環保循環水再生系統，水資源利用率達95%以上。",
+          question: "太空站內的飲用水主要是怎樣取得的？",
+          speechText: "太空站入面嘅飲用水主要係點樣取得嘅呢？A 每日由地球運送，B 回收汗水同廢水過濾再用，C 收集雨水。",
+          options: [
+            { key: "A", text: "每天從地球運送 🚀" },
+            { key: "B", text: "回收汗水和廢水過濾再用 ♻️" },
+            { key: "C", text: "收集雨水 🌧️" }
+          ],
+          answer: "B",
+          hint: "太空站很珍惜每一滴水，會循環再用。",
+          hintSpeech: "太空站非常珍惜每一滴水，會透過高科技系統循環再用。"
+        },
+        {
+          id: 12,
+          moduleIndex: 2,
+          moduleName: "夢天實驗艙（綜合區）",
+          location: "通風製氧區",
+          desc: "電解製氧系統，保障航天員充足純淨氧氣。",
+          question: "航天員在太空站內呼吸所需的氧氣是如何產生的？",
+          speechText: "航天員喺太空站入面呼吸所需嘅氧氣係點樣產生嘅呢？A 使用儀器電解水產生，B 自己閉氣，C 帶幾個氣球。",
+          options: [
+            { key: "A", text: "使用儀器電解水產生 ⚡" },
+            { key: "B", text: "自己閉氣 😶" },
+            { key: "C", text: "帶幾個氣球 🎈" }
+          ],
+          answer: "A",
+          hint: "特別儀器可以把水分解，製造氧氣。",
+          hintSpeech: "特別嘅儀器可以將水分解，製造出足夠嘅氧氣。"
+        },
+        {
+          id: 13,
+          moduleIndex: 2,
+          moduleName: "夢天實驗艙（綜合區）",
+          location: "太空健身室",
+          desc: "設有太空跑步機、阻抗自行車等鍛鍊器材。",
+          question: "為甚麼航天員每天都要在太空鍛鍊身體？",
+          speechText: "點解航天員每日都要喺太空鍛鍊身體呢？A 為了減肥，B 防止肌肉萎縮和骨質流失，C 太過寒冷。",
+          options: [
+            { key: "A", text: "為了減肥 🏃" },
+            { key: "B", text: "防止肌肉萎縮和骨質流失 🦴" },
+            { key: "C", text: "太寒冷 ❄️" }
+          ],
+          answer: "B",
+          hint: "在微重力環境，身體不常用力，肌肉和骨骼會變弱。",
+          hintSpeech: "喺太空微重力環境入面，身體唔常用力，肌肉同骨骼會變弱，所以要運動。"
+        },
+        {
+          id: 14,
+          moduleIndex: 2,
+          moduleName: "夢天實驗艙（綜合區）",
+          location: "專家檔案屏",
+          desc: "香港科研專家參與國家航天工程光榮展板。",
+          question: "影片中進行示範實驗的黎家盈，她的身份是甚麼？",
+          speechText: "影片入面進行示範實驗嘅黎家盈，佢嘅身份係咩呢？A 著名歌手，B 電影演員，C 香港首位載荷專家。",
+          options: [
+            { key: "A", text: "著名歌手 🎤" },
+            { key: "B", text: "電影演員 🎬" },
+            { key: "C", text: "香港首位載荷專家 👩‍🚀" }
+          ],
+          answer: "C",
+          hint: "她是參與航天任務、進行科學實驗的專家。",
+          hintSpeech: "佢係香港參與國家航天任務、負責進行科學實驗嘅傑出專家。"
+        },
+        {
+          id: 15,
+          moduleIndex: 2,
+          moduleName: "夢天實驗艙（綜合區）",
+          location: "實驗控制台",
+          desc: "總攬各項空間科學技術實驗的中央主控台。",
+          question: "「載荷專家」在太空主要負責甚麼工作？",
+          speechText: "載荷專家喺太空主要負責咩工作呢？A 駕駛太空船，B 烹飪和打掃，C 進行各項科學實驗。",
+          options: [
+            { key: "A", text: "駕駛太空船 🕹️" },
+            { key: "B", text: "烹飪和打掃 🧹" },
+            { key: "C", text: "進行各項科學實驗 🔬" }
+          ],
+          answer: "C",
+          hint: "「載荷」與太空任務中的科學實驗有關。",
+          hintSpeech: "載荷專家嘅工作，主要係操作太空站內各種高科技科學實驗。"
+        }
+      ];
+
+      /* 隨機正向稱讚 (Cantonese Praise) */
+      const CORRECT_PRAISES = [
+        "答啱喇！你好醒呀！🌟",
+        "做得好！你又收集到一粒太空星星！⭐",
+        "完全正確！繼續探索啦，小小航天員！🚀"
+      ];
+
+      /* 隨機溫和鼓勵 (Gentle Encouragement) */
+      const WRONG_ENCOURAGES = [
+        "唔緊要，我哋睇吓提示，再試一次啦！",
+        "差少少啫！慢慢諗，您一定做得到。💪",
+        "未啱都冇問題，太空人都要多次練習呀！"
+      ];
+
+      /* 艙段設定資訊 */
+      const MODULE_CONFIGS = [
+        {
+          index: 0,
+          name: "天和核心艙（生活區）",
+          shortName: "天和核心艙 🚀",
+          accentColor: "#38bdf8",
+          bgColor1: "#0b142c",
+          bgColor2: "#16284e",
+          floorColor: "#1e3a5f",
+          badge: "生活區 🚀"
+        },
+        {
+          index: 1,
+          name: "問天實驗艙（科學區）",
+          shortName: "問天實驗艙 🔬",
+          accentColor: "#a855f7",
+          bgColor1: "#120f2e",
+          bgColor2: "#221752",
+          floorColor: "#34226d",
+          badge: "科學區 🔬"
+        },
+        {
+          index: 2,
+          name: "夢天實驗艙（綜合區）",
+          shortName: "夢天實驗艙 🌍",
+          accentColor: "#10b981",
+          bgColor1: "#081822",
+          bgColor2: "#0d2e38",
+          floorColor: "#114752",
+          badge: "綜合區 🌍"
+        }
+      ];
+
+      /* ==========================================================================
+         Web Audio API 程式化合成音效（完全無外部依賴、純代碼生成）
+         ========================================================================== */
+      let audioCtx = null;
+      let isSoundEnabled = true;
+
+      function getAudioContext() {
+        if (!audioCtx) {
+          const AudioContextClass = window.AudioContext || window.webkitAudioContext;
+          if (AudioContextClass) {
+            audioCtx = new AudioContextClass();
+          }
+        }
+        if (audioCtx && audioCtx.state === "suspended") {
+          audioCtx.resume();
+        }
+        return audioCtx;
+      }
+
+      function playSound(type) {
+        if (!isSoundEnabled) return;
+        try {
+          const ctx = getAudioContext();
+          if (!ctx) return;
+
+          const now = ctx.currentTime;
+
+          if (type === "jump") {
+            // 輕柔的升調浮力滑音 (Sine wave 220Hz -> 380Hz)
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(220, now);
+            osc.frequency.exponentialRampToValueAtTime(420, now + 0.16);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.16);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.16);
+          } else if (type === "correct") {
+            // 答對水晶和弦琶音 (C5, E5, G5, C6)
+            const freqs = [523.25, 659.25, 783.99, 1046.5];
+            freqs.forEach((freq, i) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = "triangle";
+              osc.frequency.setValueAtTime(freq, now + i * 0.09);
+              gain.gain.setValueAtTime(0.15, now + i * 0.09);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + i * 0.09 + 0.35);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now + i * 0.09);
+              osc.stop(now + i * 0.09 + 0.35);
+            });
+          } else if (type === "wrong") {
+            // 溫和雙音提示 (440Hz -> 370Hz 軟木琴音，絕不刺耳)
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(415, now);
+            osc.frequency.linearRampToValueAtTime(370, now + 0.22);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.22);
+          } else if (type === "interact") {
+            // 開啟探索點叮咚聲
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(587.33, now);
+            osc.frequency.exponentialRampToValueAtTime(880, now + 0.14);
+            gain.gain.setValueAtTime(0.15, now);
+            gain.gain.exponentialRampToValueAtTime(0.01, now + 0.22);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.22);
+          } else if (type === "respawn") {
+            // 安全復位柔和泡泡音
+            const osc = ctx.createOscillator();
+            const gain = ctx.createGain();
+            osc.type = "sine";
+            osc.frequency.setValueAtTime(320, now);
+            osc.frequency.linearRampToValueAtTime(520, now + 0.25);
+            gain.gain.setValueAtTime(0.12, now);
+            gain.gain.linearRampToValueAtTime(0.01, now + 0.25);
+            osc.connect(gain);
+            gain.connect(ctx.destination);
+            osc.start(now);
+            osc.stop(now + 0.25);
+          } else if (type === "fanfare") {
+            // 慶祝與通關和弦
+            [523.25, 659.25, 783.99, 1046.5, 1318.5].forEach((freq, idx) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = "triangle";
+              osc.frequency.setValueAtTime(freq, now + idx * 0.12);
+              gain.gain.setValueAtTime(0.16, now + idx * 0.12);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.12 + 0.5);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now + idx * 0.12);
+              osc.stop(now + idx * 0.12 + 0.5);
+            });
+          } else if (type === "badge") {
+            // 成就解鎖慶賀明亮和弦琶音 (G4, C5, E5, G5, C6)
+            [392.0, 523.25, 659.25, 783.99, 1046.5].forEach((freq, idx) => {
+              const osc = ctx.createOscillator();
+              const gain = ctx.createGain();
+              osc.type = "triangle";
+              osc.frequency.setValueAtTime(freq, now + idx * 0.08);
+              gain.gain.setValueAtTime(0.18, now + idx * 0.08);
+              gain.gain.exponentialRampToValueAtTime(0.001, now + idx * 0.08 + 0.45);
+              osc.connect(gain);
+              gain.connect(ctx.destination);
+              osc.start(now + idx * 0.08);
+              osc.stop(now + idx * 0.08 + 0.45);
+            });
+          }
+        } catch (e) {
+          console.warn("音效播放微調：", e);
+        }
+      }
+
+      /* ==========================================================================
+         SpeechSynthesis 語音朗讀系統（廣東話優先、自適應回退、容錯保護）
+         ========================================================================== */
+      let isSlowRate = true; // 預設慢速 0.85x，最適合 SEN 中學生聆聽
+      let availableVoices = [];
+
+      function initSpeechVoices() {
+        if ("speechSynthesis" in window) {
+          availableVoices = window.speechSynthesis.getVoices();
+          window.speechSynthesis.onvoiceschanged = () => {
+            availableVoices = window.speechSynthesis.getVoices();
+          };
+        }
+      }
+      initSpeechVoices();
+
+      function getCantoneseVoice() {
+        if (!availableVoices || availableVoices.length === 0) {
+          if ("speechSynthesis" in window) {
+            availableVoices = window.speechSynthesis.getVoices();
+          }
+        }
+        // 1. 優先尋找香港廣東話 (zh-HK / yue)
+        let voice = availableVoices.find(v => {
+          const l = (v.lang || "").toLowerCase();
+          const n = (v.name || "").toLowerCase();
+          return l.includes("zh-hk") || l.includes("yue") || n.includes("hong kong") || n.includes("cantonese");
+        });
+
+        // 2. 次選台灣或通用繁體中文 (zh-TW, zh-MO, zh)
+        if (!voice) {
+          voice = availableVoices.find(v => {
+            const l = (v.lang || "").toLowerCase();
+            return l.includes("zh-tw") || l.includes("zh-mo");
+          });
+        }
+
+        // 3. 次選任何中文 (zh-cn, zh)
+        if (!voice) {
+          voice = availableVoices.find(v => {
+            const l = (v.lang || "").toLowerCase();
+            return l.startsWith("zh");
+          });
+        }
+
+        return voice || null;
+      }
+
+      function speakText(text, onStartCallback, onEndCallback) {
+        if (!("speechSynthesis" in window)) {
+          if (onEndCallback) onEndCallback();
+          return;
+        }
+
+        try {
+          window.speechSynthesis.cancel(); // 停止先前的朗讀，避免重疊
+
+          const utter = new SpeechSynthesisUtterance(text);
+          const voice = getCantoneseVoice();
+          if (voice) {
+            utter.voice = voice;
+            utter.lang = voice.lang;
+          } else {
+            utter.lang = "zh-HK";
+          }
+
+          // 速度設定 (慢速 0.82x / 正常 1.0x)
+          utter.rate = isSlowRate ? 0.82 : 1.0;
+          utter.pitch = 1.05;
+
+          utter.onstart = () => {
+            if (onStartCallback) onStartCallback();
+          };
+
+          utter.onend = () => {
+            if (onEndCallback) onEndCallback();
+          };
+
+          utter.onerror = (err) => {
+            console.warn("朗讀結束或中斷：", err);
+            if (onEndCallback) onEndCallback();
+          };
+
+          window.speechSynthesis.speak(utter);
+        } catch (err) {
+          console.warn("語音合成保護：", err);
+          if (onEndCallback) onEndCallback();
+        }
+      }
+
+      /* ==========================================================================
+         遊戲狀態管理 (Game State)
+         ========================================================================== */
+      const STORAGE_KEY = "tiangong_astronaut_game_sen_progress_v1";
+
+      const gameState = {
+        currentModuleIndex: 0, // 0: 天和核心艙, 1: 問天實驗艙, 2: 夢天實驗艙
+        completedQuestionIds: [], // 答對的題目 ID 列表 (1-15)
+        activeQuestion: null, // 目前開啟答題的題目物件
+        isPaused: true, // 答題或開場時暫停物理計算
+        nearPod: null, // 主角走近之探索點
+        isTransitioning: false // 過渡中狀態防重複觸發
+      };
+
+      // 載入儲存進度
+      function loadProgress() {
+        try {
+          const raw = localStorage.getItem(STORAGE_KEY);
+          if (raw) {
+            const parsed = JSON.parse(raw);
+            if (Array.isArray(parsed.completedQuestionIds)) {
+              gameState.completedQuestionIds = parsed.completedQuestionIds;
+            }
+            if (typeof parsed.currentModuleIndex === "number") {
+              gameState.currentModuleIndex = parsed.currentModuleIndex;
+            }
+          }
+        } catch (e) {
+          console.warn("進度讀取保護：", e);
+        }
+      }
+
+      // 保存進度
+      function saveProgress() {
+        try {
+          localStorage.setItem(STORAGE_KEY, JSON.stringify({
+            completedQuestionIds: gameState.completedQuestionIds,
+            currentModuleIndex: gameState.currentModuleIndex
+          }));
+        } catch (e) {
+          console.warn("進度存檔保護：", e);
+        }
+      }
+
+      // 重設進度
+      function resetProgress() {
+        gameState.completedQuestionIds = [];
+        gameState.currentModuleIndex = 0;
+        saveProgress();
+        updateProgressUI();
+        updateBadgesUI();
+        initLevel(0);
+        showSafeToast("進度已重設，開啟全新航天探險！🚀");
+      }
+
+      /* ==========================================================================
+         航天成就徽章系統 (Achievement Badges Data & Logic)
+         根據完成艙段與任務進度解鎖對應徽章，並於結算證書展示
+         ========================================================================== */
+      const BADGES_DATA = [
+        {
+          id: "badge_liftoff",
+          name: "啟航小先鋒",
+          icon: "🚀",
+          color: "#38bdf8",
+          module: "啟程任務",
+          reqText: "完成第 1 個航天探索任務",
+          desc: "邁出太空站探險第一步！成功解鎖並回答第一個航天題目。",
+          speech: "啟航小先鋒徽章！恭喜你邁出天宮探索第一步，成功完成第一個航天任務！",
+          check: (qIds) => qIds.length >= 1,
+          progress: (qIds) => ({ current: Math.min(qIds.length, 1), target: 1, text: `${Math.min(qIds.length, 1)} / 1 題` })
+        },
+        {
+          id: "badge_tianhe",
+          name: "天和生活大師",
+          icon: "🛋️",
+          color: "#f59e0b",
+          module: "天和核心艙",
+          reqText: "完成天和核心艙全部 5 個生活任務 (第 1-5 題)",
+          desc: "熟習微重力生活、太空睡眠袋固定、特製飲水袋及水球乒乓球娛樂！",
+          speech: "天和生活大師徽章！你已經熟習微重力生活、太空睡袋同特製飲水袋嘅用法！",
+          check: (qIds) => [1, 2, 3, 4, 5].every(id => qIds.includes(id)),
+          progress: (qIds) => {
+            const c = [1, 2, 3, 4, 5].filter(id => qIds.includes(id)).length;
+            return { current: c, target: 5, text: `${c} / 5 題` };
+          }
+        },
+        {
+          id: "badge_wentian",
+          name: "問天科學專家",
+          icon: "🔬",
+          color: "#10b981",
+          module: "問天實驗艙",
+          reqText: "完成問天實驗艙全部 5 個科學任務 (第 6-10 題)",
+          desc: "掌握液體表面張力、水球實驗、太空廚房加熱及溫室擬南芥植物生長！",
+          speech: "問天科學專家徽章！你已經掌握液體表面張力、水球實驗同太空溫室種植嘅科學知識！",
+          check: (qIds) => [6, 7, 8, 9, 10].every(id => qIds.includes(id)),
+          progress: (qIds) => {
+            const c = [6, 7, 8, 9, 10].filter(id => qIds.includes(id)).length;
+            return { current: c, target: 5, text: `${c} / 5 題` };
+          }
+        },
+        {
+          id: "badge_mengtian",
+          name: "夢天載荷先鋒",
+          icon: "🇭🇰",
+          color: "#a855f7",
+          module: "夢天實驗艙",
+          reqText: "完成夢天實驗艙全部 5 個科研任務 (第 11-15 題)",
+          desc: "認識再生生命保障系統、電解水製氧，以及香港首位載荷專家黎家盈科研事蹟！",
+          speech: "夢天載荷先鋒徽章！你認識咗再生生命保障系統，同埋香港首位載荷專家黎家盈嘅科研事蹟！",
+          check: (qIds) => [11, 12, 13, 14, 15].every(id => qIds.includes(id)),
+          progress: (qIds) => {
+            const c = [11, 12, 13, 14, 15].filter(id => qIds.includes(id)).length;
+            return { current: c, target: 5, text: `${c} / 5 題` };
+          }
+        },
+        {
+          id: "badge_stride",
+          name: "敏捷太空漫步者",
+          icon: "⭐",
+          color: "#ec4899",
+          module: "里程碑突破",
+          reqText: "累計完成 10 個航天任務里程碑",
+          desc: "在微重力太空站中漫步敏捷，順利突破兩大艙段共 10 個航天任務！",
+          speech: "敏捷太空漫步者徽章！你在太空站動作靈活敏捷，成功突破十個航天任務大關！",
+          check: (qIds) => qIds.length >= 10,
+          progress: (qIds) => ({ current: Math.min(qIds.length, 10), target: 10, text: `${Math.min(qIds.length, 10)} / 10 題` })
+        },
+        {
+          id: "badge_grandmaster",
+          name: "天宮全能航天員",
+          icon: "👑",
+          color: "#eab308",
+          module: "最高榮譽大滿貫",
+          reqText: "全數完成 15 個航天探索任務 (100% 達成)",
+          desc: "成功走遍天宮三大艙段，15 題全部通關，榮獲最高天宮榮譽大獎章！",
+          speech: "天宮全能航天員終極大獎章！恭喜你走遍天宮三大艙段，完成全部十五個航天任務，獲得最高航天榮譽！",
+          check: (qIds) => qIds.length >= 15,
+          progress: (qIds) => ({ current: Math.min(qIds.length, 15), target: 15, text: `${Math.min(qIds.length, 15)} / 15 題` })
+        }
+      ];
+
+      function getUnlockedBadges(qIds = gameState.completedQuestionIds) {
+        return BADGES_DATA.filter(b => b.check(qIds));
+      }
+
+      function updateBadgesUI() {
+        const unlocked = getUnlockedBadges();
+        const count = unlocked.length;
+        const total = BADGES_DATA.length;
+        const countEl = document.getElementById("unlocked-badge-count");
+        if (countEl) countEl.textContent = count;
+
+        const modalCountEl = document.getElementById("badges-modal-count");
+        if (modalCountEl) modalCountEl.textContent = count;
+
+        const modalPercentEl = document.getElementById("badges-modal-percent");
+        const percent = Math.round((count / total) * 100);
+        if (modalPercentEl) modalPercentEl.textContent = `${percent}%`;
+
+        const modalBarEl = document.getElementById("badges-modal-bar");
+        if (modalBarEl) modalBarEl.style.width = `${percent}%`;
+      }
+
+      let achievementToastTimer = null;
+      function showAchievementToast(badge) {
+        const toast = document.getElementById("achievement-toast");
+        const toastIcon = document.getElementById("toast-badge-icon");
+        const toastName = document.getElementById("toast-badge-name");
+        if (!toast || !toastIcon || !toastName) return;
+
+        toastIcon.textContent = badge.icon;
+        toastName.textContent = badge.name;
+
+        playSound("badge");
+        toast.classList.add("show");
+
+        if (achievementToastTimer) clearTimeout(achievementToastTimer);
+        achievementToastTimer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 3800);
+      }
+
+      function checkNewBadges(prevCompleted, currentCompleted) {
+        const prevUnlocked = BADGES_DATA.filter(b => b.check(prevCompleted)).map(b => b.id);
+        const currentUnlocked = BADGES_DATA.filter(b => b.check(currentCompleted));
+        const newlyUnlocked = currentUnlocked.filter(b => !prevUnlocked.includes(b.id));
+
+        if (newlyUnlocked.length > 0) {
+          newlyUnlocked.forEach((badge, index) => {
+            setTimeout(() => {
+              showAchievementToast(badge);
+            }, index * 4000);
+          });
+        }
+        updateBadgesUI();
+      }
+
+      function renderBadgesModal() {
+        updateBadgesUI();
+        const container = document.getElementById("badges-items-container");
+        if (!container) return;
+
+        container.innerHTML = "";
+        const qIds = gameState.completedQuestionIds;
+
+        BADGES_DATA.forEach(badge => {
+          const isUnlocked = badge.check(qIds);
+          const prog = badge.progress(qIds);
+
+          const card = document.createElement("div");
+          card.className = `badge-item-card ${isUnlocked ? "unlocked" : "locked"}`;
+
+          card.innerHTML = `
+            <div class="badge-item-icon-box">
+              <span>${badge.icon}</span>
+              ${!isUnlocked ? '<span class="badge-lock-tag">🔒</span>' : ''}
+            </div>
+            <div class="badge-item-content">
+              <div class="badge-item-header">
+                <span class="badge-item-name">${badge.name}</span>
+                <span class="badge-status-pill ${isUnlocked ? "unlocked" : "locked"}">
+                  ${isUnlocked ? "✨ 已獲得" : "🔒 待解鎖"}
+                </span>
+              </div>
+              <p class="badge-item-desc">${badge.desc}</p>
+              <div class="badge-item-req">🎯 條件：${badge.reqText}</div>
+              <div class="badge-item-footer">
+                <span class="badge-item-progress">進度：${prog.text}</span>
+                <button class="btn-speech btn-speak-badge" style="padding: 4px 10px; font-size: 13px;" title="朗讀此徽章">
+                  🔊 朗讀
+                </button>
+              </div>
+            </div>
+          `;
+
+          const speakBtn = card.querySelector(".btn-speak-badge");
+          if (speakBtn) {
+            speakBtn.onclick = (e) => {
+              e.stopPropagation();
+              speakBtn.classList.add("speaking");
+              const speechContent = isUnlocked 
+                ? `${badge.speech} 已成功獲得！`
+                : `${badge.name}徽章。條件是：${badge.reqText}。目前進度是：${prog.text}。繼續加油解鎖啦！`;
+              speakText(speechContent, null, () => {
+                speakBtn.classList.remove("speaking");
+              });
+            };
+          }
+
+          container.appendChild(card);
+        });
+      }
+
+      function renderCertificateBadges() {
+        const qIds = gameState.completedQuestionIds;
+        const unlockedBadges = getUnlockedBadges(qIds);
+        const countText = document.getElementById("cert-badge-count-text");
+        if (countText) {
+          countText.textContent = `${unlockedBadges.length} / ${BADGES_DATA.length}`;
+        }
+
+        const grid = document.getElementById("cert-badges-list");
+        if (grid) {
+          grid.innerHTML = "";
+          BADGES_DATA.forEach(badge => {
+            const isUnlocked = badge.check(qIds);
+            const pill = document.createElement("div");
+            pill.className = `cert-badge-pill ${isUnlocked ? "unlocked" : "locked"}`;
+            pill.innerHTML = `
+              <span style="font-size: 20px;">${isUnlocked ? badge.icon : "🔒"}</span>
+              <span>${badge.name}</span>
+              ${isUnlocked ? '<span style="color: #4ade80; font-size: 12px;">✔</span>' : ''}
+            `;
+            grid.appendChild(pill);
+          });
+        }
+
+        const allBanner = document.getElementById("cert-all-badges-award");
+        if (allBanner) {
+          allBanner.style.display = (unlockedBadges.length === BADGES_DATA.length) ? "block" : "none";
+        }
+      }
+
+      function openBadgesModal() {
+        gameState.isPaused = true;
+        renderBadgesModal();
+        playSound("interact");
+        document.getElementById("badges-modal").classList.add("active");
+      }
+
+      function closeBadgesModal() {
+        document.getElementById("badges-modal").classList.remove("active");
+        if (!questionModal.classList.contains("active") && 
+            !transitionModal.classList.contains("active") && 
+            !certificateModal.classList.contains("active") && 
+            !introModal.classList.contains("active")) {
+          gameState.isPaused = false;
+        }
+      }
+
+      /* ==========================================================================
+         關卡物理地圖與探索點佈局
+         ========================================================================== */
+      const LEVEL_WIDTH = 2600; // 地圖橫向長度
+      const LEVEL_HEIGHT = 650; // 地圖縱向高度
+
+      // 平台定義（每艙段擁有精美設計的高低平台結構）
+      const MODULE_PLATFORMS = [
+        /* 艙段 0: 天和核心艙 (生活區) */
+        [
+          { x: 0, y: 560, w: 2600, h: 90, type: "ground" }, // 主地面
+          { x: 260, y: 450, w: 180, h: 24, label: "休閒觀景台" },
+          { x: 550, y: 360, w: 220, h: 24, label: "洗盥整理台" },
+          { x: 920, y: 440, w: 200, h: 24, label: "乒乓球桌模塊" },
+          { x: 1280, y: 350, w: 220, h: 24, label: "中央飲水站" },
+          { x: 1650, y: 430, w: 190, h: 24, label: "壁掛睡眠艙梯" },
+          { x: 1980, y: 360, w: 240, h: 24, label: "天和氣閘連接廊" }
+        ],
+        /* 艙段 1: 問天實驗艙 (科學區) */
+        [
+          { x: 0, y: 560, w: 2600, h: 90, type: "ground" },
+          { x: 280, y: 430, w: 200, h: 24, label: "物理流體櫃" },
+          { x: 620, y: 350, w: 210, h: 24, label: "液體懸浮站" },
+          { x: 980, y: 450, w: 220, h: 24, label: "水耕植物架" },
+          { x: 1350, y: 360, w: 200, h: 24, label: "太空微波儲存台" },
+          { x: 1720, y: 440, w: 220, h: 24, label: "材料物理實驗艙" },
+          { x: 2050, y: 350, w: 220, h: 24, label: "科學出艙氣閘台" }
+        ],
+        /* 艙段 2: 夢天實驗艙 (綜合區) */
+        [
+          { x: 0, y: 560, w: 2600, h: 90, type: "ground" },
+          { x: 280, y: 440, w: 200, h: 24, label: "水循環控制櫃" },
+          { x: 620, y: 360, w: 220, h: 24, label: "電解氧反應器" },
+          { x: 1000, y: 450, w: 240, h: 24, label: "太空跑步鍛鍊台" },
+          { x: 1400, y: 350, w: 210, h: 24, label: "港產專家檔案屏" },
+          { x: 1780, y: 430, w: 220, h: 24, label: "載荷核心控制台" },
+          { x: 2120, y: 350, w: 220, h: 24, label: "夢天綜合主控艙" }
+        ]
+      ];
+
+      // 探索點位置（每個艙段 5 個探索點，走近可開啟題目）
+      const MODULE_PODS = [
+        /* 艙段 0: 題目 1 - 5 */
+        [
+          { qId: 1, x: 350, y: 380, name: "1. 大堂", icon: "🎈" },
+          { qId: 2, x: 660, y: 290, name: "2. 洗盥區", icon: "💧" },
+          { qId: 3, x: 1020, y: 370, name: "3. 娛樂區", icon: "🏓" },
+          { qId: 4, x: 1390, y: 280, name: "4. 飲水機", icon: "🧃" },
+          { qId: 5, x: 1740, y: 360, name: "5. 睡眠區", icon: "🛌" }
+        ],
+        /* 艙段 1: 題目 6 - 10 */
+        [
+          { qId: 6, x: 380, y: 360, name: "6. 物理實驗台", icon: "🕸️" },
+          { qId: 7, x: 720, y: 280, name: "7. 液體觀察箱", icon: "🔵" },
+          { qId: 8, x: 1090, y: 380, name: "8. 太空溫室", icon: "🪴" },
+          { qId: 9, x: 1450, y: 290, name: "9. 太空廚房", icon: "⚡" },
+          { qId: 10, x: 1830, y: 370, name: "10. 物料儲存櫃", icon: "🧻" }
+        ],
+        /* 艙段 2: 題目 11 - 15 */
+        [
+          { qId: 11, x: 380, y: 370, name: "11. 生命保障系統", icon: "♻️" },
+          { qId: 12, x: 730, y: 290, name: "12. 通風製氧區", icon: "⚡" },
+          { qId: 13, x: 1120, y: 380, name: "13. 太空健身室", icon: "🏃" },
+          { qId: 14, x: 1500, y: 280, name: "14. 專家檔案屏", icon: "👩‍🚀" },
+          { qId: 15, x: 1890, y: 360, name: "15. 實驗控制台", icon: "🔬" }
+        ]
+      ];
+
+      /* ==========================================================================
+         主角（原創可愛小小航天員）與物理系統
+         ========================================================================== */
+      const player = {
+        x: 100,
+        y: 480,
+        w: 42,
+        h: 62,
+        vx: 0,
+        vy: 0,
+        facing: 1, // 1: 右, -1: 左
+        onGround: false,
+        isWalking: false,
+        walkFrame: 0,
+        jumpAnimTime: 0,
+        lastSafeX: 100,
+        lastSafeY: 480
+      };
+
+      // 鍵盤輸入狀態
+      const keys = {
+        left: false,
+        right: false,
+        jump: false,
+        explore: false
+      };
+
+      // 攝影機水平視角跟隨
+      const camera = {
+        x: 0,
+        y: 0,
+        viewportW: 800,
+        viewportH: 600
+      };
+
+      // 星空粒子背景
+      const backgroundStars = [];
+      for (let i = 0; i < 70; i++) {
+        backgroundStars.push({
+          x: Math.random() * LEVEL_WIDTH,
+          y: Math.random() * LEVEL_HEIGHT * 0.75,
+          radius: Math.random() * 1.8 + 0.6,
+          blinkSpeed: Math.random() * 0.04 + 0.015,
+          alpha: Math.random() * 0.7 + 0.3
+        });
+      }
+
+      /* ==========================================================================
+         艙段專屬環境視覺特效 (Immersive Module Ambient Effects)
+         問天實驗艙：微重力漂浮生物細胞、液體微滴與植物孢子光點
+         夢天實驗艙：綜合控制台動態儀表盤、跳動指示燈、電平數據波動條與全息掃描光
+         天和核心艙：生命補給微浮水汽泡泡、空氣對流微粒與溫馨生活光暈
+         ========================================================================== */
+      // 1. 問天實驗艙：漂浮生物細胞粒子群 (Bio-cell & Plant Spores Particles)
+      const wentianBioCells = [];
+      for (let i = 0; i < 42; i++) {
+        wentianBioCells.push({
+          x: Math.random() * LEVEL_WIDTH,
+          y: 40 + Math.random() * (LEVEL_HEIGHT - 120),
+          r: 6 + Math.random() * 12, // 細胞半徑
+          organellesCount: 2 + Math.floor(Math.random() * 4), // 細胞器數量
+          vx: (Math.random() - 0.5) * 0.35,
+          vy: (Math.random() - 0.5) * 0.28,
+          wobbleSpeed: 0.0015 + Math.random() * 0.002,
+          wobbleOffset: Math.random() * Math.PI * 2,
+          pulseSpeed: 0.002 + Math.random() * 0.0025,
+          colorType: Math.random() > 0.5 ? "green" : "purple", // 擬南芥植物細胞 / 科學培養細胞
+          haloAlpha: 0.25 + Math.random() * 0.25
+        });
+      }
+
+      // 2. 夢天實驗艙：高科技控制台儀表盤與跳動指示燈集群 (Console Panels & Pulsing Instrument Lights)
+      const mengtianConsoleBanks = [
+        { x: 180, y: 190, w: 220, h: 140, title: "CIRCULATION SYS 01" },
+        { x: 500, y: 140, w: 280, h: 160, title: "O2 ELECTROLYSIS RACK" },
+        { x: 880, y: 180, w: 240, h: 140, title: "MICRO-GRAVITY TELEMETRY" },
+        { x: 1260, y: 150, w: 280, h: 150, title: "HABITAT ATMOSPHERE BUS" },
+        { x: 1640, y: 170, w: 260, h: 150, title: "PAYLOAD SCI-ARRAY" },
+        { x: 2000, y: 140, w: 300, h: 160, title: "MAIN COMMAND MATRIX" }
+      ];
+
+      // 生成隨機跳動 LED 指示燈陣列
+      const mengtianLEDs = [];
+      mengtianConsoleBanks.forEach((panel, pIdx) => {
+        const rows = 3;
+        const cols = 7;
+        for (let r = 0; r < rows; r++) {
+          for (let c = 0; c < cols; c++) {
+            mengtianLEDs.push({
+              x: panel.x + 20 + c * 26,
+              y: panel.y + 40 + r * 22,
+              baseColor: ["#10b981", "#38bdf8", "#fbbf24", "#f43f5e", "#a855f7"][((r * cols + c + pIdx) % 5)],
+              freq: 0.003 + Math.random() * 0.008,
+              phase: Math.random() * Math.PI * 2,
+              mode: Math.random() > 0.3 ? "blink" : "wave"
+            });
+          }
+        }
+      });
+
+      // 3. 天和核心艙：微重力水汽氣泡粒子 (Life Bubbles & Micro Water Droplets)
+      const tianheLifeBubbles = [];
+      for (let i = 0; i < 35; i++) {
+        tianheLifeBubbles.push({
+          x: Math.random() * LEVEL_WIDTH,
+          y: 60 + Math.random() * (LEVEL_HEIGHT - 160),
+          radius: 3 + Math.random() * 8,
+          vx: (Math.random() - 0.5) * 0.25,
+          vy: -0.1 - Math.random() * 0.3,
+          floatPhase: Math.random() * Math.PI * 2
+        });
+      }
+
+      /* 初始化關卡 */
+      function initLevel(moduleIndex) {
+        gameState.currentModuleIndex = moduleIndex;
+        gameState.isTransitioning = false;
+        player.x = 100;
+        player.y = 480;
+        player.vx = 0;
+        player.vy = 0;
+        player.lastSafeX = 100;
+        player.lastSafeY = 480;
+        camera.x = 0;
+
+        const config = MODULE_CONFIGS[moduleIndex];
+        document.getElementById("header-module-name").textContent = config.name;
+        updateProgressUI();
+      }
+
+      /* 顯示畫面中央安全復位提示 */
+      let safeToastTimer = null;
+      function showSafeToast(msg) {
+        const toast = document.getElementById("safe-toast");
+        toast.textContent = msg || "不用怕，返回安全位置，再試一次！🌟";
+        toast.classList.add("show");
+        if (safeToastTimer) clearTimeout(safeToastTimer);
+        safeToastTimer = setTimeout(() => {
+          toast.classList.remove("show");
+        }, 2600);
+      }
+
+      /* ==========================================================================
+         物理計算與碰撞偵測 (Physics & Update)
+         ========================================================================== */
+      const GRAVITY = 0.45; // 微重力輕盈感
+      const MOVE_ACCEL = 0.8;
+      const MAX_SPEED = 5.2;
+      const FRICTION = 0.84;
+      const JUMP_POWER = -11.5;
+
+      function updatePhysics() {
+        if (gameState.isPaused) return;
+
+        // 1. 水平移動計算
+        if (keys.left) {
+          player.vx -= MOVE_ACCEL;
+          player.facing = -1;
+          player.isWalking = true;
+        } else if (keys.right) {
+          player.vx += MOVE_ACCEL;
+          player.facing = 1;
+          player.isWalking = true;
+        } else {
+          player.vx *= FRICTION;
+          if (Math.abs(player.vx) < 0.1) player.vx = 0;
+          player.isWalking = false;
+        }
+
+        // 速度上限
+        if (player.vx > MAX_SPEED) player.vx = MAX_SPEED;
+        if (player.vx < -MAX_SPEED) player.vx = -MAX_SPEED;
+
+        // 2. 跳躍
+        if (keys.jump && player.onGround) {
+          player.vy = JUMP_POWER;
+          player.onGround = false;
+          playSound("jump");
+        }
+
+        // 3. 重力累積
+        player.vy += GRAVITY;
+        if (player.vy > 14) player.vy = 14;
+
+        // 4. 移動主角位置
+        player.x += player.vx;
+        player.y += player.vy;
+
+        // 5. 步行動畫計算
+        if (player.isWalking && player.onGround) {
+          player.walkFrame += 0.2;
+        } else {
+          player.walkFrame = 0;
+        }
+
+        // 6. 邊界檢查（防止走出地圖左側）
+        if (player.x < 20) {
+          player.x = 20;
+          player.vx = 0;
+        }
+
+        // 7. 平台碰撞偵測 (AABB)
+        const platforms = MODULE_PLATFORMS[gameState.currentModuleIndex] || [];
+        player.onGround = false;
+
+        for (const plat of platforms) {
+          // 主角腳底落在平台上
+          const isAbove = (player.y + player.h - player.vy) <= (plat.y + 12);
+          const isHittingX = (player.x + player.w > plat.x + 4) && (player.x < plat.x + plat.w - 4);
+
+          if (isHittingX && isAbove && (player.y + player.h >= plat.y) && player.vy >= 0) {
+            player.y = plat.y - player.h;
+            player.vy = 0;
+            player.onGround = true;
+
+            // 記錄最近安全位置
+            player.lastSafeX = player.x;
+            player.lastSafeY = player.y;
+            break;
+          }
+        }
+
+        // 8. 掉落保護（掉落到底部安全網時，溫和回到最近的安全平台）
+        if (player.y > LEVEL_HEIGHT + 40) {
+          player.x = player.lastSafeX;
+          player.y = player.lastSafeY - 10;
+          player.vx = 0;
+          player.vy = 0;
+          playSound("respawn");
+          showSafeToast("不用怕，返回安全位置，再試一次！🌟");
+        }
+
+        // 9. 檢查與探索點 (Pod) 的距離
+        const pods = MODULE_PODS[gameState.currentModuleIndex] || [];
+        let closestPod = null;
+        const playerCenterX = player.x + player.w / 2;
+        const playerCenterY = player.y + player.h / 2;
+
+        for (const pod of pods) {
+          const dist = Math.hypot(playerCenterX - pod.x, playerCenterY - (pod.y + 20));
+          if (dist < 75) {
+            closestPod = pod;
+            break;
+          }
+        }
+
+        gameState.nearPod = closestPod;
+
+        // 更新探索提示與手機按鈕狀態
+        const hintEl = document.getElementById("proximity-hint");
+        const exploreBtn = document.getElementById("btn-touch-explore");
+
+        if (closestPod) {
+          const isCompleted = gameState.completedQuestionIds.includes(closestPod.qId);
+          if (isCompleted) {
+            hintEl.textContent = `✨ ${closestPod.name}（✅ 已完成，點擊可重溫）`;
+          } else {
+            hintEl.textContent = `✨ 發現【${closestPod.name}】！按 E 探索`;
+          }
+          hintEl.classList.add("show");
+          exploreBtn.classList.remove("disabled");
+        } else {
+          hintEl.classList.remove("show");
+          exploreBtn.classList.add("disabled");
+        }
+
+        // 10. 檢查過關氣閘艙門（在最右側）
+        const currentModuleQuestions = QUESTIONS_DATA.filter(q => q.moduleIndex === gameState.currentModuleIndex);
+        const moduleCompletedCount = currentModuleQuestions.filter(q => gameState.completedQuestionIds.includes(q.id)).length;
+
+        // 當前艙段全部 5 題完成，且走到氣閘門旁 (x > 2300)
+        if (moduleCompletedCount >= 5 && player.x > 2300 && !gameState.isTransitioning) {
+          gameState.isTransitioning = true;
+          if (gameState.currentModuleIndex < 2) {
+            // 前往下一艙段
+            openModuleTransition(gameState.currentModuleIndex + 1);
+          } else {
+            // 全部 15 題完成！開啟榮譽證書
+            openCertificateModal();
+          }
+        }
+
+        // 11. 平滑攝影機跟隨
+        const targetCamX = player.x - camera.viewportW / 2 + player.w / 2;
+        camera.x += (targetCamX - camera.x) * 0.12;
+        if (camera.x < 0) camera.x = 0;
+        if (camera.x > LEVEL_WIDTH - camera.viewportW) {
+          camera.x = LEVEL_WIDTH - camera.viewportW;
+        }
+      }
+
+      /* ==========================================================================
+         繪圖渲染 (Canvas Render Engine)
+         ========================================================================== */
+      const canvas = document.getElementById("gameCanvas");
+      const ctx = canvas.getContext("2d");
+
+      function resizeCanvas() {
+        const wrapper = document.getElementById("canvas-wrapper");
+        const w = wrapper.clientWidth;
+        const h = wrapper.clientHeight;
+        const dpr = window.devicePixelRatio || 1;
+
+        canvas.width = w * dpr;
+        canvas.height = h * dpr;
+        camera.viewportW = w;
+        camera.viewportH = h;
+
+        ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+      }
+      window.addEventListener("resize", resizeCanvas);
+
+      /* 繪製原創太空站背景 */
+      function drawBackground() {
+        const config = MODULE_CONFIGS[gameState.currentModuleIndex];
+
+        // 1. 深邃太空漸變
+        const bgGrad = ctx.createLinearGradient(0, 0, 0, camera.viewportH);
+        bgGrad.addColorStop(0, config.bgColor1);
+        bgGrad.addColorStop(1, config.bgColor2);
+        ctx.fillStyle = bgGrad;
+        ctx.fillRect(0, 0, camera.viewportW, camera.viewportH);
+
+        // 2. 緩慢移動的星空背景 (Parallax Stars)
+        for (const star of backgroundStars) {
+          const parallaxX = (star.x - camera.x * 0.25) % camera.viewportW;
+          const drawX = parallaxX < 0 ? parallaxX + camera.viewportW : parallaxX;
+          const alpha = 0.4 + Math.sin(Date.now() * star.blinkSpeed) * 0.3;
+
+          ctx.fillStyle = `rgba(255, 255, 255, ${alpha})`;
+          ctx.beginPath();
+          ctx.arc(drawX, star.y, star.radius, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 3. 巨型地球弧線 (太空舷窗外的蔚藍地球地平線)
+        const earthCenterScreenX = camera.viewportW * 0.7 - camera.x * 0.08;
+        const earthCenterScreenY = camera.viewportH + 280;
+        const earthRadius = 460;
+
+        const earthGrad = ctx.createRadialGradient(
+          earthCenterScreenX, earthCenterScreenY - earthRadius * 0.7, 50,
+          earthCenterScreenX, earthCenterScreenY, earthRadius
+        );
+        earthGrad.addColorStop(0, "#38bdf8");
+        earthGrad.addColorStop(0.3, "#0284c7");
+        earthGrad.addColorStop(0.85, "#082f49");
+        earthGrad.addColorStop(1, "rgba(8, 47, 73, 0)");
+
+        ctx.save();
+        ctx.beginPath();
+        ctx.arc(earthCenterScreenX, earthCenterScreenY, earthRadius, 0, Math.PI * 2);
+        ctx.fillStyle = earthGrad;
+        ctx.fill();
+
+        // 地球大氣發光層
+        ctx.strokeStyle = "rgba(56, 189, 248, 0.45)";
+        ctx.lineWidth = 6;
+        ctx.stroke();
+        ctx.restore();
+
+        // 4. 太空站網格結構與艙壁骨架
+        ctx.save();
+        ctx.translate(-camera.x, 0);
+
+        ctx.strokeStyle = "rgba(255, 255, 255, 0.04)";
+        ctx.lineWidth = 1;
+        for (let x = 0; x < LEVEL_WIDTH; x += 120) {
+          ctx.beginPath();
+          ctx.moveTo(x, 0);
+          ctx.lineTo(x, LEVEL_HEIGHT);
+          ctx.stroke();
+        }
+
+        // 艙段主題標語與指示牌
+        ctx.fillStyle = "rgba(255, 255, 255, 0.12)";
+        ctx.font = "bold 42px sans-serif";
+        ctx.fillText(`TIANGONG STATION // ${config.name}`, 120, 110);
+
+        ctx.restore();
+
+        // 5. 繪製艙段專屬環境視覺特效（背景層：控制台、艙壁儀表、全息掃描線）
+        drawModuleBackgroundEffects();
+      }
+
+      /* 繪製艙段背景專屬環境特效 (問天生物實驗艙 & 夢天控制台儀表盤 & 天和生活氣泡) */
+      function drawModuleBackgroundEffects() {
+        const moduleIdx = gameState.currentModuleIndex;
+        const now = Date.now();
+
+        ctx.save();
+        ctx.translate(-camera.x, 0);
+
+        if (moduleIdx === 1) {
+          // ==========================================
+          // 艙段 1: 問天實驗艙 —— 背景微重力生物細胞與培養艙觀察光柱
+          // ==========================================
+          // 繪製微弱培養艙垂直全息光束
+          for (let beamX = 220; beamX < LEVEL_WIDTH; beamX += 420) {
+            const beamGrad = ctx.createLinearGradient(beamX, 0, beamX + 90, 0);
+            beamGrad.addColorStop(0, "rgba(168, 85, 247, 0)");
+            beamGrad.addColorStop(0.5, "rgba(168, 85, 247, 0.045)");
+            beamGrad.addColorStop(1, "rgba(168, 85, 247, 0)");
+            ctx.fillStyle = beamGrad;
+            ctx.fillRect(beamX, 0, 90, LEVEL_HEIGHT);
+          }
+
+          // 繪製背景漂浮的微生物細胞群 (Bio-cells with nucleus & organelles)
+          for (const cell of wentianBioCells) {
+            // 平滑浮游更新
+            cell.x += cell.vx;
+            cell.y += cell.vy;
+            if (cell.x < 0) cell.x = LEVEL_WIDTH;
+            if (cell.x > LEVEL_WIDTH) cell.x = 0;
+            if (cell.y < 30) cell.y = LEVEL_HEIGHT - 130;
+            if (cell.y > LEVEL_HEIGHT - 110) cell.y = 40;
+
+            const pulse = 1 + Math.sin(now * cell.pulseSpeed + cell.wobbleOffset) * 0.14;
+            const curR = cell.r * pulse;
+            const wobbleX = Math.cos(now * cell.wobbleSpeed + cell.wobbleOffset) * 4;
+            const wobbleY = Math.sin(now * cell.wobbleSpeed + cell.wobbleOffset) * 4;
+            const drawCx = cell.x + wobbleX;
+            const drawCy = cell.y + wobbleY;
+
+            // 僅在攝影機視野及邊界內渲染以優化效能
+            if (drawCx + curR * 2 < camera.x - 50 || drawCx - curR * 2 > camera.x + camera.viewportW + 50) {
+              continue;
+            }
+
+            ctx.save();
+            // 1. 細胞外層微光發光膜 (Membrane Halo)
+            const isGreen = cell.colorType === "green";
+            const haloGrad = ctx.createRadialGradient(drawCx, drawCy, curR * 0.4, drawCx, drawCy, curR * 1.5);
+            if (isGreen) {
+              haloGrad.addColorStop(0, "rgba(52, 211, 153, 0.4)");
+              haloGrad.addColorStop(0.7, "rgba(16, 185, 129, 0.15)");
+              haloGrad.addColorStop(1, "rgba(16, 185, 129, 0)");
+            } else {
+              haloGrad.addColorStop(0, "rgba(216, 180, 254, 0.4)");
+              haloGrad.addColorStop(0.7, "rgba(168, 85, 247, 0.15)");
+              haloGrad.addColorStop(1, "rgba(168, 85, 247, 0)");
+            }
+            ctx.fillStyle = haloGrad;
+            ctx.beginPath();
+            ctx.arc(drawCx, drawCy, curR * 1.5, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 2. 細胞質 (Cytoplasm translucent sphere)
+            ctx.fillStyle = isGreen ? "rgba(16, 185, 129, 0.22)" : "rgba(168, 85, 247, 0.22)";
+            ctx.strokeStyle = isGreen ? "rgba(110, 231, 183, 0.75)" : "rgba(192, 132, 252, 0.75)";
+            ctx.lineWidth = 1.5;
+            ctx.beginPath();
+            ctx.arc(drawCx, drawCy, curR, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 3. 細胞核 (Cell Nucleus)
+            const nucX = drawCx + Math.cos(cell.wobbleOffset) * (curR * 0.25);
+            const nucY = drawCy + Math.sin(cell.wobbleOffset) * (curR * 0.25);
+            ctx.fillStyle = isGreen ? "#34d399" : "#c084fc";
+            ctx.beginPath();
+            ctx.arc(nucX, nucY, Math.max(2, curR * 0.35), 0, Math.PI * 2);
+            ctx.fill();
+
+            // 4. 微型細胞器 / 植物葉綠體光斑 (Organelles)
+            ctx.fillStyle = isGreen ? "#a7f3d0" : "#f3e8ff";
+            for (let org = 0; org < cell.organellesCount; org++) {
+              const ang = (org / cell.organellesCount) * Math.PI * 2 + now * 0.001;
+              const ox = drawCx + Math.cos(ang) * (curR * 0.62);
+              const oy = drawCy + Math.sin(ang) * (curR * 0.62);
+              ctx.beginPath();
+              ctx.arc(ox, oy, 1.4, 0, Math.PI * 2);
+              ctx.fill();
+            }
+
+            ctx.restore();
+          }
+        } else if (moduleIdx === 2) {
+          // ==========================================
+          // 艙段 2: 夢天實驗艙 —— 控制台機櫃、動態儀表盤、跳動 LED 與示波器心跳電平
+          // ==========================================
+          mengtianConsoleBanks.forEach((panel, pIdx) => {
+            // 檢查視野裁切
+            if (panel.x + panel.w < camera.x - 40 || panel.x > camera.x + camera.viewportW + 40) {
+              return;
+            }
+
+            ctx.save();
+            // 1. 機櫃底板外框 (Futuristic Server Rack Chassis)
+            const rackGrad = ctx.createLinearGradient(panel.x, panel.y, panel.x, panel.y + panel.h);
+            rackGrad.addColorStop(0, "#0f172a");
+            rackGrad.addColorStop(1, "#022c22");
+            ctx.fillStyle = rackGrad;
+            ctx.fillRect(panel.x, panel.y, panel.w, panel.h);
+
+            ctx.strokeStyle = "#10b981";
+            ctx.lineWidth = 2;
+            ctx.strokeRect(panel.x, panel.y, panel.w, panel.h);
+
+            // 機櫃四角加固防護鉚釘裝飾
+            ctx.fillStyle = "#34d399";
+            [[panel.x + 5, panel.y + 5], [panel.x + panel.w - 5, panel.y + 5], [panel.x + 5, panel.y + panel.h - 5], [panel.x + panel.w - 5, panel.y + panel.h - 5]].forEach(([cx, cy]) => {
+              ctx.beginPath();
+              ctx.arc(cx, cy, 2, 0, Math.PI * 2);
+              ctx.fill();
+            });
+
+            // 2. 機櫃頂部發光文字標籤
+            ctx.fillStyle = "#10b981";
+            ctx.font = "bold 11px monospace";
+            ctx.fillText(`[${panel.title}]`, panel.x + 14, panel.y + 18);
+
+            // 狀態在線指示點
+            const isOnlinePulse = Math.sin(now * 0.005 + pIdx) > 0;
+            ctx.fillStyle = isOnlinePulse ? "#4ade80" : "#059669";
+            ctx.beginPath();
+            ctx.arc(panel.x + panel.w - 18, panel.y + 14, 4, 0, Math.PI * 2);
+            ctx.fill();
+
+            // 3. 示波器動態波形顯示屏 (Oscilloscope Telemetry Screen)
+            const screenX = panel.x + 16;
+            const screenY = panel.y + 26;
+            const screenW = panel.w - 32;
+            const screenH = 42;
+
+            ctx.fillStyle = "rgba(0, 0, 0, 0.75)";
+            ctx.fillRect(screenX, screenY, screenW, screenH);
+            ctx.strokeStyle = "#047857";
+            ctx.lineWidth = 1;
+            ctx.strokeRect(screenX, screenY, screenW, screenH);
+
+            // 示波器網格
+            ctx.strokeStyle = "rgba(16, 185, 129, 0.15)";
+            ctx.beginPath();
+            ctx.moveTo(screenX, screenY + screenH / 2);
+            ctx.lineTo(screenX + screenW, screenY + screenH / 2);
+            ctx.stroke();
+
+            // 示波器綠色實時正弦/心跳電平波 (Realtime sine/telemetry wave)
+            ctx.strokeStyle = "#34d399";
+            ctx.lineWidth = 1.6;
+            ctx.beginPath();
+            for (let wx = 0; wx < screenW; wx += 3) {
+              const freq = (pIdx % 2 === 0) ? 0.08 : 0.05;
+              const amp = (pIdx % 3 === 0) ? 14 : 10;
+              const wy = screenY + screenH / 2 + Math.sin((wx * freq) - now * 0.008 + pIdx) * amp;
+              if (wx === 0) ctx.moveTo(screenX + wx, wy);
+              else ctx.lineTo(screenX + wx, wy);
+            }
+            ctx.stroke();
+
+            // 4. 動態音量/能耗電平條 (Audio/Energy VU Equalizer Bars)
+            const barStartX = panel.x + 16;
+            const barY = panel.y + 76;
+            const totalBars = 12;
+            for (let b = 0; b < totalBars; b++) {
+              const bx = barStartX + b * ((panel.w - 32) / totalBars);
+              const bw = 10;
+              // 依時間計算電平高度
+              const barVal = (Math.sin(now * 0.006 + b * 0.6 + pIdx) + 1) / 2;
+              const bh = 14 + barVal * 36;
+              const by = barY + 46 - bh;
+
+              const barGrad = ctx.createLinearGradient(bx, by, bx, by + bh);
+              if (barVal > 0.8) {
+                barGrad.addColorStop(0, "#f43f5e");
+                barGrad.addColorStop(0.3, "#fbbf24");
+                barGrad.addColorStop(1, "#10b981");
+              } else if (barVal > 0.5) {
+                barGrad.addColorStop(0, "#fbbf24");
+                barGrad.addColorStop(1, "#10b981");
+              } else {
+                barGrad.addColorStop(0, "#34d399");
+                barGrad.addColorStop(1, "#047857");
+              }
+
+              ctx.fillStyle = barGrad;
+              ctx.fillRect(bx, by, bw, bh);
+            }
+
+            ctx.restore();
+          });
+
+          // 繪製跳動的彩色儀表盤 LED 指示燈
+          for (const led of mengtianLEDs) {
+            if (led.x < camera.x - 20 || led.x > camera.x + camera.viewportW + 20) continue;
+
+            const isLit = led.mode === "blink"
+              ? (Math.sin(now * led.freq + led.phase) > 0.15)
+              : ((Math.sin(now * led.freq + led.phase) + 1) / 2 > 0.4);
+
+            ctx.save();
+            if (isLit) {
+              // 耀眼微光暈
+              ctx.fillStyle = led.baseColor;
+              ctx.shadowColor = led.baseColor;
+              ctx.shadowBlur = 8;
+              ctx.beginPath();
+              ctx.arc(led.x, led.y, 3.5, 0, Math.PI * 2);
+              ctx.fill();
+
+              // 白心高亮
+              ctx.fillStyle = "#ffffff";
+              ctx.shadowBlur = 0;
+              ctx.beginPath();
+              ctx.arc(led.x, led.y, 1.2, 0, Math.PI * 2);
+              ctx.fill();
+            } else {
+              // 暗態指示燈
+              ctx.fillStyle = "rgba(15, 23, 42, 0.9)";
+              ctx.strokeStyle = "#334155";
+              ctx.lineWidth = 1;
+              ctx.beginPath();
+              ctx.arc(led.x, led.y, 2.5, 0, Math.PI * 2);
+              ctx.fill();
+              ctx.stroke();
+            }
+            ctx.restore();
+          }
+
+          // 繪製天花板掃描雷射光束 (Cyan Scan Rays)
+          const scanX = (now * 0.08) % LEVEL_WIDTH;
+          if (scanX > camera.x - 60 && scanX < camera.x + camera.viewportW + 60) {
+            ctx.save();
+            const scanGrad = ctx.createLinearGradient(scanX, 0, scanX + 40, 0);
+            scanGrad.addColorStop(0, "rgba(56, 189, 248, 0)");
+            scanGrad.addColorStop(0.5, "rgba(56, 189, 248, 0.12)");
+            scanGrad.addColorStop(1, "rgba(56, 189, 248, 0)");
+            ctx.fillStyle = scanGrad;
+            ctx.fillRect(scanX, 0, 40, LEVEL_HEIGHT);
+            ctx.restore();
+          }
+        } else if (moduleIdx === 0) {
+          // ==========================================
+          // 艙段 0: 天和核心艙 —— 生活區微重力水汽氣泡粒子與微弱藍光
+          // ==========================================
+          for (const bub of tianheLifeBubbles) {
+            bub.x += bub.vx;
+            bub.y += bub.vy;
+            if (bub.x < 0) bub.x = LEVEL_WIDTH;
+            if (bub.x > LEVEL_WIDTH) bub.x = 0;
+            if (bub.y < 30) bub.y = LEVEL_HEIGHT - 130;
+
+            const floatX = bub.x + Math.sin(now * 0.002 + bub.floatPhase) * 5;
+            if (floatX < camera.x - 30 || floatX > camera.x + camera.viewportW + 30) continue;
+
+            ctx.save();
+            // 水滴氣泡半透明球體
+            const bubGrad = ctx.createRadialGradient(
+              floatX - bub.radius * 0.3, bub.y - bub.radius * 0.3, 1,
+              floatX, bub.y, bub.radius
+            );
+            bubGrad.addColorStop(0, "rgba(224, 242, 254, 0.7)");
+            bubGrad.addColorStop(0.6, "rgba(56, 189, 248, 0.25)");
+            bubGrad.addColorStop(1, "rgba(2, 132, 199, 0.1)");
+
+            ctx.fillStyle = bubGrad;
+            ctx.strokeStyle = "rgba(186, 230, 253, 0.65)";
+            ctx.lineWidth = 1;
+            ctx.beginPath();
+            ctx.arc(floatX, bub.y, bub.radius, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.stroke();
+
+            // 水滴高光小白點
+            ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+            ctx.beginPath();
+            ctx.arc(floatX - bub.radius * 0.35, bub.y - bub.radius * 0.35, Math.max(1, bub.radius * 0.25), 0, Math.PI * 2);
+            ctx.fill();
+            ctx.restore();
+          }
+        }
+
+        ctx.restore();
+      }
+
+      /* 繪製平台結構 */
+      function drawPlatforms() {
+        const platforms = MODULE_PLATFORMS[gameState.currentModuleIndex] || [];
+        const config = MODULE_CONFIGS[gameState.currentModuleIndex];
+
+        ctx.save();
+        ctx.translate(-camera.x, 0);
+
+        for (const plat of platforms) {
+          // 平台本體
+          const grad = ctx.createLinearGradient(plat.x, plat.y, plat.x, plat.y + plat.h);
+          grad.addColorStop(0, "#1e293b");
+          grad.addColorStop(1, config.floorColor);
+
+          ctx.fillStyle = grad;
+          ctx.beginPath();
+          ctx.roundRect(plat.x, plat.y, plat.w, plat.h, plat.type === "ground" ? 0 : 10);
+          ctx.fill();
+
+          // 科技發光頂部防滑邊緣
+          ctx.strokeStyle = config.accentColor;
+          ctx.lineWidth = 3;
+          ctx.beginPath();
+          ctx.moveTo(plat.x, plat.y);
+          ctx.lineTo(plat.x + plat.w, plat.y);
+          ctx.stroke();
+
+          // 平台下方微光
+          ctx.strokeStyle = "rgba(255, 255, 255, 0.1)";
+          ctx.lineWidth = 1;
+          ctx.strokeRect(plat.x, plat.y, plat.w, plat.h);
+
+          // 平台標籤裝飾
+          if (plat.label) {
+            ctx.fillStyle = "rgba(255, 255, 255, 0.4)";
+            ctx.font = "12px sans-serif";
+            ctx.fillText(plat.label, plat.x + 12, plat.y + 17);
+          }
+        }
+
+        ctx.restore();
+      }
+
+      /* 繪製探索點 (Discovery Pods) */
+      function drawPods() {
+        const pods = MODULE_PODS[gameState.currentModuleIndex] || [];
+        const time = Date.now() * 0.003;
+
+        ctx.save();
+        ctx.translate(-camera.x, 0);
+
+        for (const pod of pods) {
+          const isDone = gameState.completedQuestionIds.includes(pod.qId);
+          const isNear = gameState.nearPod && gameState.nearPod.qId === pod.qId;
+
+          // 懸浮上下微動
+          const floatY = pod.y + Math.sin(time + pod.qId) * 6;
+
+          // 1. 底座立柱
+          ctx.fillStyle = "#1e293b";
+          ctx.fillRect(pod.x - 14, floatY + 20, 28, 45);
+          ctx.strokeStyle = isDone ? "#10b981" : "#38bdf8";
+          ctx.lineWidth = 2;
+          ctx.strokeRect(pod.x - 14, floatY + 20, 28, 45);
+
+          // 2. 懸浮發光能量環
+          const ringColor = isDone ? "rgba(16, 185, 129, 0.6)" : "rgba(56, 189, 248, 0.7)";
+          ctx.strokeStyle = ringColor;
+          ctx.lineWidth = isNear ? 4 : 2;
+          ctx.beginPath();
+          ctx.ellipse(pod.x, floatY + 12, 32 + Math.sin(time * 2) * 4, 12, 0, 0, Math.PI * 2);
+          ctx.stroke();
+
+          // 3. 中央全息水晶球
+          const sphereGrad = ctx.createRadialGradient(pod.x - 4, floatY - 4, 2, pod.x, floatY, 20);
+          if (isDone) {
+            sphereGrad.addColorStop(0, "#86efac");
+            sphereGrad.addColorStop(0.7, "#10b981");
+            sphereGrad.addColorStop(1, "#065f46");
+          } else {
+            sphereGrad.addColorStop(0, "#fef08a");
+            sphereGrad.addColorStop(0.6, "#f59e0b");
+            sphereGrad.addColorStop(1, "#b45309");
+          }
+
+          ctx.fillStyle = sphereGrad;
+          ctx.beginPath();
+          ctx.arc(pod.x, floatY, 18, 0, Math.PI * 2);
+          ctx.fill();
+
+          // 4. 探索點標示 Emoji 與文字
+          ctx.font = "16px sans-serif";
+          ctx.textAlign = "center";
+          ctx.fillText(pod.icon, pod.x, floatY + 6);
+
+          // 標題名
+          ctx.fillStyle = isDone ? "#86efac" : "#f8fafc";
+          ctx.font = "bold 13px sans-serif";
+          ctx.fillText(pod.name, pod.x, floatY - 26);
+
+          // 完成標籤
+          if (isDone) {
+            ctx.fillStyle = "#34d399";
+            ctx.font = "bold 11px sans-serif";
+            ctx.fillText("✅ 已完成", pod.x, floatY - 10);
+          } else if (isNear) {
+            // 靠近時的閃耀光環
+            ctx.strokeStyle = "#fbbf24";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(pod.x, floatY, 26 + Math.sin(time * 4) * 3, 0, Math.PI * 2);
+            ctx.stroke();
+          }
+        }
+
+        // 5. 最右側氣閘艙門 (Airlock Door)
+        const currentModuleQuestions = QUESTIONS_DATA.filter(q => q.moduleIndex === gameState.currentModuleIndex);
+        const moduleCompletedCount = currentModuleQuestions.filter(q => gameState.completedQuestionIds.includes(q.id)).length;
+        const isDoorUnlocked = moduleCompletedCount >= 5;
+
+        const doorX = 2420;
+        const doorY = 430;
+        ctx.fillStyle = isDoorUnlocked ? "rgba(16, 185, 129, 0.2)" : "rgba(30, 41, 59, 0.7)";
+        ctx.strokeStyle = isDoorUnlocked ? "#10b981" : "#64748b";
+        ctx.lineWidth = 4;
+        ctx.strokeRect(doorX, doorY, 90, 130);
+        ctx.fillRect(doorX, doorY, 90, 130);
+
+        ctx.fillStyle = isDoorUnlocked ? "#34d399" : "#94a3b8";
+        ctx.font = "bold 14px sans-serif";
+        ctx.textAlign = "center";
+        ctx.fillText(isDoorUnlocked ? "⚡ 艙門開啟" : "🔒 待解鎖", doorX + 45, doorY - 14);
+        ctx.fillText(gameState.currentModuleIndex < 2 ? "下一艙段 ➔" : "領取證書 🏆", doorX + 45, doorY + 65);
+
+        ctx.restore();
+      }
+
+      /* 繪製原創可愛小小航天員 */
+      function drawAstronaut() {
+        ctx.save();
+        ctx.translate(-camera.x, 0);
+
+        const x = player.x;
+        const y = player.y;
+        const facing = player.facing;
+        const walkCycle = Math.sin(player.walkFrame);
+
+        ctx.save();
+        ctx.translate(x + player.w / 2, y + player.h / 2);
+        ctx.scale(facing, 1);
+
+        // 1. 太空生活維持背包 (Life Support Backpack)
+        ctx.fillStyle = "#e2e8f0";
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-24, -18, 14, 34, 6);
+        ctx.fill();
+        ctx.stroke();
+
+        // 背包指示燈
+        ctx.fillStyle = "#38bdf8";
+        ctx.beginPath();
+        ctx.arc(-17, -10, 3, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 噴射微氣泡小粒子 (跳躍時)
+        if (!player.onGround) {
+          ctx.fillStyle = "rgba(56, 189, 248, 0.7)";
+          ctx.beginPath();
+          ctx.arc(-22, 18 + Math.random() * 6, 3 + Math.random() * 2, 0, Math.PI * 2);
+          ctx.fill();
+        }
+
+        // 2. 雙腿 (Legs with walking bounce)
+        const legAngleL = player.onGround ? walkCycle * 0.45 : -0.3;
+        const legAngleR = player.onGround ? -walkCycle * 0.45 : 0.3;
+
+        // 左腿
+        ctx.save();
+        ctx.translate(-6, 12);
+        ctx.rotate(legAngleL);
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#475569";
+        ctx.beginPath();
+        ctx.roundRect(-5, 0, 10, 18, 5);
+        ctx.fill();
+        ctx.stroke();
+        // 太空靴
+        ctx.fillStyle = "#334155";
+        ctx.beginPath();
+        ctx.roundRect(-6, 14, 13, 7, 3);
+        ctx.fill();
+        ctx.restore();
+
+        // 右腿
+        ctx.save();
+        ctx.translate(6, 12);
+        ctx.rotate(legAngleR);
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#475569";
+        ctx.beginPath();
+        ctx.roundRect(-5, 0, 10, 18, 5);
+        ctx.fill();
+        ctx.stroke();
+        // 太空靴
+        ctx.fillStyle = "#334155";
+        ctx.beginPath();
+        ctx.roundRect(-6, 14, 13, 7, 3);
+        ctx.fill();
+        ctx.restore();
+
+        // 3. 太空服身體 (Torso)
+        ctx.fillStyle = "#f8fafc";
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.roundRect(-12, -12, 24, 26, 8);
+        ctx.fill();
+        ctx.stroke();
+
+        // 胸前國旗金星小標章
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath();
+        ctx.roundRect(-7, -8, 8, 6, 2);
+        ctx.fill();
+        ctx.fillStyle = "#fbbf24";
+        ctx.beginPath();
+        ctx.arc(-4, -5, 1.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 4. 太空頭盔 (Helmet)
+        ctx.fillStyle = "#ffffff";
+        ctx.strokeStyle = "#475569";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.arc(0, -18, 17, 0, Math.PI * 2);
+        ctx.fill();
+        ctx.stroke();
+
+        // 面罩反光 (Golden/Cyan Visor)
+        const visorGrad = ctx.createLinearGradient(-10, -26, 12, -10);
+        visorGrad.addColorStop(0, "#38bdf8");
+        visorGrad.addColorStop(0.5, "#0284c7");
+        visorGrad.addColorStop(1, "#f59e0b");
+
+        ctx.fillStyle = visorGrad;
+        ctx.beginPath();
+        ctx.ellipse(3, -18, 10, 8, 0, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 可愛反光白點
+        ctx.fillStyle = "rgba(255, 255, 255, 0.85)";
+        ctx.beginPath();
+        ctx.arc(6, -21, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        // 頭盔頂部通訊小天線
+        ctx.strokeStyle = "#64748b";
+        ctx.lineWidth = 2;
+        ctx.beginPath();
+        ctx.moveTo(0, -35);
+        ctx.lineTo(0, -38);
+        ctx.stroke();
+
+        ctx.fillStyle = "#ef4444";
+        ctx.beginPath();
+        ctx.arc(0, -39, 2.5, 0, Math.PI * 2);
+        ctx.fill();
+
+        ctx.restore();
+        ctx.restore();
+      }
+
+      /* 繪製艙段前景漂浮微光效果 (Foreground Ambient Particles) */
+      function drawModuleForegroundEffects() {
+        const moduleIdx = gameState.currentModuleIndex;
+        const now = Date.now();
+
+        ctx.save();
+        ctx.translate(-camera.x, 0);
+
+        if (moduleIdx === 1) {
+          // 問天實驗艙：前景輕盈飄過的植物光子與微型葉綠細胞 (綠光與紫光微粒子)
+          for (let i = 0; i < 18; i++) {
+            const seed = i * 149.2;
+            const px = ((seed * 19.3 + now * 0.04) % LEVEL_WIDTH);
+            const py = 80 + Math.sin(now * 0.0015 + i) * 180 + (i % 6) * 60;
+            if (px < camera.x - 30 || px > camera.x + camera.viewportW + 30) continue;
+
+            const isGreen = i % 2 === 0;
+            ctx.fillStyle = isGreen ? "rgba(74, 222, 128, 0.45)" : "rgba(216, 180, 254, 0.45)";
+            ctx.shadowColor = isGreen ? "#4ade80" : "#d8b4fe";
+            ctx.shadowBlur = 6;
+            ctx.beginPath();
+            ctx.arc(px, py, 2.5 + Math.sin(now * 0.003 + i) * 1, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.shadowBlur = 0;
+          }
+        } else if (moduleIdx === 2) {
+          // 夢天實驗艙：控制台數據全息光點 (Holographic Data Sparks)
+          for (let i = 0; i < 16; i++) {
+            const seed = i * 163.7;
+            const px = ((seed * 23.1 + now * 0.05) % LEVEL_WIDTH);
+            const py = 120 + Math.cos(now * 0.002 + i) * 140 + (i % 5) * 70;
+            if (px < camera.x - 30 || px > camera.x + camera.viewportW + 30) continue;
+
+            ctx.fillStyle = i % 3 === 0 ? "rgba(56, 189, 248, 0.6)" : "rgba(16, 185, 129, 0.6)";
+            ctx.shadowColor = i % 3 === 0 ? "#38bdf8" : "#10b981";
+            ctx.shadowBlur = 5;
+            ctx.fillRect(px - 1.5, py - 1.5, 3, 3);
+            ctx.shadowBlur = 0;
+          }
+        }
+
+        ctx.restore();
+      }
+
+      /* 主遊戲主迴圈 (Game Loop) */
+      function gameLoop() {
+        updatePhysics();
+
+        ctx.clearRect(0, 0, camera.viewportW, camera.viewportH);
+        drawBackground();
+        drawPlatforms();
+        drawPods();
+        drawAstronaut();
+        drawModuleForegroundEffects();
+
+        requestAnimationFrame(gameLoop);
+      }
+
+      /* ==========================================================================
+         答題介面與互動系統 (SEN 友善模態框與回饋)
+         ========================================================================== */
+      const questionModal = document.getElementById("question-modal");
+      const modalPodLocation = document.getElementById("modal-pod-location");
+      const modalQProgress = document.getElementById("modal-q-progress");
+      const modalQuestionTitle = document.getElementById("modal-question-title");
+      const modalOptionsContainer = document.getElementById("modal-options-container");
+      const feedbackBox = document.getElementById("feedback-box");
+      const feedbackMessage = document.getElementById("feedback-message");
+      const btnContinueExplore = document.getElementById("btn-continue-explore");
+      const btnSpeakQuestion = document.getElementById("btn-speak-question");
+      const btnSpeakFeedback = document.getElementById("btn-speak-feedback");
+
+      // 開啟題目視窗
+      function openQuestionModal(qId) {
+        const q = QUESTIONS_DATA.find(item => item.id === qId);
+        if (!q) return;
+
+        gameState.activeQuestion = q;
+        gameState.isPaused = true;
+        playSound("interact");
+
+        modalPodLocation.textContent = `${q.moduleName}・${q.location}`;
+        const modalPodIconEl = document.getElementById("modal-pod-icon");
+        if (modalPodIconEl) modalPodIconEl.textContent = q.icon || "🔬";
+        modalQProgress.textContent = `題目 ${q.id} / 15`;
+        modalQuestionTitle.textContent = q.question;
+
+        // 重設反饋與繼續按鈕
+        feedbackBox.className = "feedback-box";
+        btnContinueExplore.style.display = "none";
+
+        // 動態生成三個大選項按鈕
+        modalOptionsContainer.innerHTML = "";
+        q.options.forEach(opt => {
+          const btn = document.createElement("button");
+          btn.className = "option-btn";
+          btn.innerHTML = `<span><strong>${opt.key}.</strong> ${opt.text}</span>`;
+          btn.onclick = () => handleSelectOption(btn, opt.key);
+          modalOptionsContainer.appendChild(btn);
+        });
+
+        // 朗讀題目按鈕綁定
+        btnSpeakQuestion.onclick = () => {
+          btnSpeakQuestion.classList.add("speaking");
+          const readText = q.speechText || `${q.question}。選項 A：${q.options[0].text}。選項 B：${q.options[1].text}。選項 C：${q.options[2].text}。`;
+          speakText(readText, null, () => {
+            btnSpeakQuestion.classList.remove("speaking");
+          });
+        };
+
+        // 自動以廣東話朗讀該題題幹（方便 SEN 學生快速理解）
+        btnSpeakQuestion.click();
+
+        questionModal.classList.add("active");
+      }
+
+      // 學生選擇答案處理 (答錯不扣分、無限次重試、溫和鼓勵)
+      function handleSelectOption(clickedBtn, selectedKey) {
+        const q = gameState.activeQuestion;
+        if (!q) return;
+
+        if (selectedKey === q.answer) {
+          // 答對！
+          playSound("correct");
+          clickedBtn.classList.add("correct");
+
+          // 禁用其他按鈕
+          const allBtns = modalOptionsContainer.querySelectorAll(".option-btn");
+          allBtns.forEach(b => b.disabled = true);
+
+          // 記錄完成進度與觸發新成就徽章檢查
+          const prevCompleted = [...gameState.completedQuestionIds];
+          if (!gameState.completedQuestionIds.includes(q.id)) {
+            gameState.completedQuestionIds.push(q.id);
+            saveProgress();
+            updateProgressUI();
+            checkNewBadges(prevCompleted, gameState.completedQuestionIds);
+          }
+
+          // 隨機選取一句廣東話稱讚
+          const praise = CORRECT_PRAISES[Math.floor(Math.random() * CORRECT_PRAISES.length)];
+          feedbackBox.className = "feedback-box correct active";
+          feedbackMessage.textContent = praise;
+          btnContinueExplore.style.display = "block";
+
+          // 朗讀稱讚
+          speakText(praise, null, null);
+        } else {
+          // 答錯：不扣分、震動、提供提示與廣東話鼓勵、保留題目讓學生無限次再試
+          playSound("wrong");
+          clickedBtn.classList.add("wrong-shake");
+          setTimeout(() => {
+            clickedBtn.classList.remove("wrong-shake");
+          }, 400);
+
+          const encourage = WRONG_ENCOURAGES[Math.floor(Math.random() * WRONG_ENCOURAGES.length)];
+          feedbackBox.className = "feedback-box wrong active";
+          feedbackMessage.innerHTML = `<span>${encourage}</span><br /><span style="font-size: 15px; color: #cbd5e1;">💡 提示：${q.hint}</span>`;
+
+          // 朗讀提示按鈕設定
+          btnSpeakFeedback.onclick = () => {
+            btnSpeakFeedback.classList.add("speaking");
+            const hintToSpeak = `${encourage} ${q.hintSpeech || q.hint}`;
+            speakText(hintToSpeak, null, () => {
+              btnSpeakFeedback.classList.remove("speaking");
+            });
+          };
+
+          // 自動朗讀鼓勵語與提示
+          btnSpeakFeedback.click();
+        }
+      }
+
+      // 關閉題目卡，繼續探索
+      function closeQuestionModal() {
+        if ("speechSynthesis" in window) {
+          window.speechSynthesis.cancel();
+        }
+        questionModal.classList.remove("active");
+        gameState.isPaused = false;
+        gameState.activeQuestion = null;
+      }
+
+      btnContinueExplore.onclick = closeQuestionModal;
+      const btnCloseQuestion = document.getElementById("btn-close-question");
+      if (btnCloseQuestion) {
+        btnCloseQuestion.onclick = closeQuestionModal;
+      }
+
+      /* ==========================================================================
+         艙段過場 (Module Transition)
+         ========================================================================== */
+      const transitionModal = document.getElementById("transition-modal");
+      const transitionTitle = document.getElementById("transition-title");
+      const transitionDesc = document.getElementById("transition-desc");
+      const btnNextModule = document.getElementById("btn-next-module");
+      const btnSpeakTransition = document.getElementById("btn-speak-transition");
+      let nextModuleTargetIndex = 1;
+
+      function openModuleTransition(nextIndex) {
+        nextModuleTargetIndex = nextIndex;
+        gameState.isPaused = true;
+        playSound("fanfare");
+
+        const targetConfig = MODULE_CONFIGS[nextIndex];
+        transitionTitle.textContent = "做得很好！🌟";
+        transitionDesc.innerHTML = `你已完成這個艙段的任務。<br />下一站：<strong>${targetConfig.name}</strong>！`;
+
+        const transitionSpeech = `做得好好呀！你已經完成呢個艙段嘅全部任務。下一站：${targetConfig.name}！一齊繼續出發啦！`;
+        btnSpeakTransition.onclick = () => {
+          btnSpeakTransition.classList.add("speaking");
+          speakText(transitionSpeech, null, () => {
+            btnSpeakTransition.classList.remove("speaking");
+          });
+        };
+
+        // 自動朗讀過場
+        btnSpeakTransition.click();
+
+        transitionModal.classList.add("active");
+      }
+
+      btnNextModule.onclick = () => {
+        transitionModal.classList.remove("active");
+        initLevel(nextModuleTargetIndex);
+        gameState.isPaused = false;
+      };
+
+      /* ==========================================================================
+         結算與榮譽證書 (Certificate)
+         ========================================================================== */
+      const certificateModal = document.getElementById("certificate-modal");
+      const btnSpeakCert = document.getElementById("btn-speak-cert");
+      const btnPrintCert = document.getElementById("btn-print-cert");
+      const btnPlayAgain = document.getElementById("btn-play-again");
+
+      function openCertificateModal() {
+        gameState.isPaused = true;
+        playSound("fanfare");
+        renderCertificateBadges();
+        certificateModal.classList.add("active");
+
+        const studentName = document.getElementById("cert-student-name").value || "同學";
+        const unlockedBadges = getUnlockedBadges(gameState.completedQuestionIds);
+        const certSpeech = `恭喜${studentName}！你成功走遍天宮太空站，完成全部15個航天任務！你仲收集到全部${unlockedBadges.length}枚航天榮譽成就徽章，成為咗一名叻叻嘅全能小小航天員！拍手掌！`;
+
+        btnSpeakCert.onclick = () => {
+          btnSpeakCert.classList.add("speaking");
+          speakText(certSpeech, null, () => {
+            btnSpeakCert.classList.remove("speaking");
+          });
+        };
+
+        btnSpeakCert.click();
+      }
+
+      btnPrintCert.onclick = () => {
+        window.print();
+      };
+
+      btnPlayAgain.onclick = () => {
+        certificateModal.classList.remove("active");
+        resetProgress();
+        gameState.isTransitioning = false;
+        gameState.isPaused = false;
+      };
+
+      /* ==========================================================================
+         進度列與 UI 更新
+         ========================================================================== */
+      function updateProgressUI() {
+        const completedCount = gameState.completedQuestionIds.length;
+        document.getElementById("progress-text").textContent = `已完成：${completedCount} / 15 題`;
+
+        const dotsContainer = document.getElementById("star-dots-container");
+        dotsContainer.innerHTML = "";
+        for (let i = 1; i <= 15; i++) {
+          const star = document.createElement("span");
+          star.className = "star-dot" + (gameState.completedQuestionIds.includes(i) ? " active" : "");
+          star.textContent = "⭐";
+          dotsContainer.appendChild(star);
+        }
+      }
+
+      /* ==========================================================================
+         使用者控制監聽（鍵盤 + 觸控長按支援）
+         ========================================================================== */
+      // 1. 鍵盤監聽
+      window.addEventListener("keydown", (e) => {
+        getAudioContext(); // 喚醒音頻上下文
+        if (gameState.isPaused) return;
+
+        if (e.code === "KeyA" || e.code === "ArrowLeft") keys.left = true;
+        if (e.code === "KeyD" || e.code === "ArrowRight") keys.right = true;
+        if (e.code === "KeyW" || e.code === "ArrowUp" || e.code === "Space") {
+          keys.jump = true;
+          e.preventDefault();
+        }
+        if (e.code === "KeyE" || e.code === "Enter") {
+          if (gameState.nearPod) {
+            openQuestionModal(gameState.nearPod.qId);
+          }
+        }
+      });
+
+      window.addEventListener("keyup", (e) => {
+        if (e.code === "KeyA" || e.code === "ArrowLeft") keys.left = false;
+        if (e.code === "KeyD" || e.code === "ArrowRight") keys.right = false;
+        if (e.code === "KeyW" || e.code === "ArrowUp" || e.code === "Space") keys.jump = false;
+      });
+
+      // 2. 手機與 iPad 觸控長按控制綁定
+      function bindTouchButton(elementId, onStart, onEnd) {
+        const btn = document.getElementById(elementId);
+        if (!btn) return;
+
+        const startHandler = (e) => {
+          e.preventDefault();
+          getAudioContext();
+          btn.classList.add("active");
+          onStart();
+        };
+
+        const endHandler = (e) => {
+          e.preventDefault();
+          btn.classList.remove("active");
+          onEnd();
+        };
+
+        btn.addEventListener("touchstart", startHandler, { passive: false });
+        btn.addEventListener("touchend", endHandler, { passive: false });
+        btn.addEventListener("touchcancel", endHandler, { passive: false });
+        btn.addEventListener("mousedown", startHandler);
+        btn.addEventListener("mouseup", endHandler);
+        btn.addEventListener("mouseleave", endHandler);
+      }
+
+      bindTouchButton("btn-touch-left", () => { keys.left = true; }, () => { keys.left = false; });
+      bindTouchButton("btn-touch-right", () => { keys.right = true; }, () => { keys.right = false; });
+      bindTouchButton("btn-touch-jump", () => { keys.jump = true; }, () => { keys.jump = false; });
+
+      // 手機探索按鈕點選
+      document.getElementById("btn-touch-explore").onclick = (e) => {
+        e.preventDefault();
+        getAudioContext();
+        if (gameState.nearPod) {
+          openQuestionModal(gameState.nearPod.qId);
+        }
+      };
+
+      /* ==========================================================================
+         頂部功能按鈕（語速、音效、重設、單檔下載）
+         ========================================================================== */
+      // 1. 語速切換（SEN 慢速 / 正常）
+      const btnRateToggle = document.getElementById("btn-rate-toggle");
+      btnRateToggle.onclick = () => {
+        isSlowRate = !isSlowRate;
+        btnRateToggle.innerHTML = isSlowRate ? "<span>🐢 慢速朗讀</span>" : "<span>⚡ 正常語速</span>";
+        showSafeToast(isSlowRate ? "已切換為清晰慢速朗讀（適合聆聽）" : "已切換為正常朗讀語速");
+      };
+
+      // 2. 音效開關
+      const btnSoundToggle = document.getElementById("btn-sound-toggle");
+      btnSoundToggle.onclick = () => {
+        isSoundEnabled = !isSoundEnabled;
+        document.getElementById("sound-icon").textContent = isSoundEnabled ? "🔊 音效" : "🔇 靜音";
+        showSafeToast(isSoundEnabled ? "音效已開啟 🔊" : "已切換為靜音模式 🔇");
+      };
+
+      // 3. 重新開始
+      document.getElementById("btn-restart").onclick = () => {
+        if (confirm("確定要清除進度並重新開始探險嗎？")) {
+          resetProgress();
+        }
+      };
+
+      // 4. 下載本單檔 HTML（支援離線保存與傳遞給學生）
+      document.getElementById("btn-download-html").onclick = () => {
+        try {
+          const htmlContent = "<!doctype html>\n" + document.documentElement.outerHTML;
+          const blob = new Blob([htmlContent], { type: "text/html;charset=utf-8" });
+          const url = URL.createObjectURL(blob);
+          const a = document.createElement("a");
+          a.href = url;
+          a.download = "天宮小小航天員_單檔探險遊戲.html";
+          document.body.appendChild(a);
+          a.click();
+          document.body.removeChild(a);
+          URL.revokeObjectURL(url);
+          showSafeToast("已下載單檔 HTML！可在任何離線裝置直接開啟 🌟");
+        } catch (err) {
+          console.warn("下載單檔提示：", err);
+          showSafeToast("可使用瀏覽器的「另存新檔」保存此網頁！");
+        }
+      };
+
+      // 5. 成就徽章面板開啟與關閉綁定
+      document.getElementById("btn-badges-toggle").onclick = () => {
+        openBadgesModal();
+      };
+      document.getElementById("btn-close-badges").onclick = () => {
+        closeBadgesModal();
+      };
+      document.getElementById("btn-badges-done").onclick = () => {
+        closeBadgesModal();
+      };
+      document.getElementById("achievement-toast").onclick = () => {
+        const toast = document.getElementById("achievement-toast");
+        toast.classList.remove("show");
+        openBadgesModal();
+      };
+
+      // 6. 徽章總進度語音朗讀
+      document.getElementById("btn-speak-badges-summary").onclick = () => {
+        const unlocked = getUnlockedBadges();
+        const total = BADGES_DATA.length;
+        const text = `成就徽章總進度：你已經解鎖咗 ${unlocked.length} 個榮譽徽章，共 ${total} 個。${unlocked.length === total ? '恭喜你達成大滿貫，全部徽章收集完成！' : '繼續在太空站探索，完成各項任務解鎖更多徽章啦！'}`;
+        const btn = document.getElementById("btn-speak-badges-summary");
+        btn.classList.add("speaking");
+        speakText(text, null, () => {
+          btn.classList.remove("speaking");
+        });
+      };
+
+      /* ==========================================================================
+         開場畫面控制
+         ========================================================================== */
+      const introModal = document.getElementById("intro-modal");
+      const btnStartGame = document.getElementById("btn-start-game");
+      const btnSpeakIntro = document.getElementById("btn-speak-intro");
+
+      btnSpeakIntro.onclick = () => {
+        btnSpeakIntro.classList.add("speaking");
+        const introText = "歡迎來到天宮小小航天員！今日，你會親自走入天宮太空站，完成十五個航天任務。用方向鍵或者畫面按鈕移動；走近發光裝置之後，按探索啦！";
+        speakText(introText, null, () => {
+          btnSpeakIntro.classList.remove("speaking");
+        });
+      };
+
+      btnStartGame.onclick = () => {
+        getAudioContext();
+        introModal.classList.remove("active");
+        gameState.isPaused = false;
+        playSound("fanfare");
+      };
+
+      /* ==========================================================================
+         遊戲啟動初始化
+         ========================================================================== */
+      window.addEventListener("DOMContentLoaded", () => {
+        resizeCanvas();
+        loadProgress();
+        updateBadgesUI();
+        initLevel(gameState.currentModuleIndex);
+        gameLoop();
+      });
+    </script>
+  </body>
+</html>
